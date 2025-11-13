@@ -1,0 +1,29 @@
+[project]
+name = "smplchat"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+license = "MIT"
+readme = "README"
+repository = "https://github.com/viljami-ilola-helsinki-fi/smplchat"
+requires-python = ">=3.13"
+packages = [{include = "smplchat", from = "src"}]
+dependencies = [
+]
+
+[project.scripts]
+smplchat = 'smplchat.main:main'
+
+[dependency-groups]
+dev = [
+    "pylint (>=4.0.2,<5.0.0)",
+    "pytest (>=9.0.1,<10.0.0)",
+    "coverage (>=7.11.3,<8.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

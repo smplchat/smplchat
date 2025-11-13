@@ -1,0 +1,12 @@
+# cache-files
+__pycache__
+.coverage
+
+# builds
+dist/
+
+# editor backups
+*~
+
+# poetry.lock - we do not need exact versions of packages at this time
+poetry.lock
