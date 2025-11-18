@@ -26,6 +26,6 @@ jobs:
     - name: Install dev environmet
       run: |
         ./dev.sh dev
-    - name: Runn all tests
+    - name: Run pytest, coverage and pylint
       run: |
-        ./dev.sh all
+        ./dev.sh auto

@@ -14,6 +14,8 @@ pytest     Run pytest unittests
 pylint     Do pylint
 covhtml    Make branch coverage report with coverage in html format
 covff      Genarate and open html coverage report in firefox
+covxml     Generate xml coverage report
+auto       Run automated tests. Intented for CI/CD pipeline.
 all        Do it all: pytest, coverage report in firefox and pylint
 install    Build PyPI package form source and install it
 " && exit 0
@@ -78,12 +80,19 @@ case $1 in
 		"$0" coverage \
 		&& poetry run coverage html
 		;;
-
+	covxml)
+		"$0" coverage \
+		&& poetry run coverage xml
+		;;
 	covff)
 		"$0" covhtml \
 		&& (firefox-bin htmlcov/index.html || echo Cannot lauch browser.)
 		;;
 
+	auto)
+		"$0" covxml \
+		&& "$0" pylint
+		;;
 	all)	
 		"$0" covff \
 		&& "$0" pylint 
