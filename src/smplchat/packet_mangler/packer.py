@@ -1,4 +1,5 @@
 """ smplchat.packet_mangler.packer - functions to form data from message classes """
+from struct import pack
 from smplchat.settings import dprint
 from .message import (
     Message,
@@ -12,23 +13,40 @@ from .message import (
     OldReplyMessage)
 
 
-def packer(msg: Message):
+def packer(m: Message):
     """ packer - packs message to binary data for sending """
-    if isinstance(msg, ChatRelayMessage):
-        pass
-    elif isinstance(msg, JoinRelayMessage):
-        pass
-    elif isinstance(msg, LeaveRelayMessage):
-        pass
-    elif isinstance(msg, KeepaliveRelayMessage):
-        pass
-    elif isinstance(msg, JoinRequestMessage):
-        pass
-    elif isinstance(msg, JoinReplyMessage):
-        pass
-    elif isinstance(msg, OldRequestMessage):
-        pass
-    elif isinstance(msg, OldReplyMessage):
-        pass
-    else:
-        dprint("ERROR: unknown message type in packer")
+    # pylint: disable-msg=too-many-return-statements, too-many-function-args
+
+    if isinstance(m, ChatRelayMessage):
+        return pack(
+            f"@BLLL20L32sLs{len(m.msg_text)}",
+            m.msg_type,			# B - 1 byte
+            m.uniq_msg_id,		# L - 4 bytes
+            m.sender_ip,		# L - 4 bytes
+            m.sender_local_time,	# L - 4 bytes
+            m.old_message_ids,		# 20L - 20x 4 bytes
+            m.sender_nick,		# 32s - 32 chars (bytes)
+            len(m.msg_text),		# L - 4 bytes
+            m.msg_text)			# ?s - ? * chars
+
+    if isinstance(m, JoinRelayMessage, LeaveRelayMessage):
+        return pack(
+            "@BLLL20L32s",
+            m.msg_type,			# B - 1 byte
+            m.uniq_msg_id,		# L - 4 bytes
+            m.sender_ip,		# L - 4 bytes
+            m.sender_local_time,	# L - 4 bytes
+            m.old_message_ids,		# 20L - 20x 4 bytes
+            m.sender_nick)		# 32s - 32 chars (bytes)
+    if isinstance(m, KeepaliveRelayMessage):
+        return None
+    if isinstance(m, JoinRequestMessage):
+        return None
+    if isinstance(m, JoinReplyMessage):
+        return None
+    if isinstance(m, OldRequestMessage):
+        return None
+    if isinstance(m, OldReplyMessage):
+        return None
+    dprint("ERROR: message type not implemented")
+    return None
