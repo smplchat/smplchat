@@ -1,4 +1,4 @@
 """ __init__ - module for UDP-port listening thread and packet queue """
-from src.smplchat.listener.listener import get_messages, stop, start
+from .listener import get_messages, stop, start
 
 __all__ = [start, stop, get_messages]

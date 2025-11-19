@@ -2,7 +2,7 @@ import socket
 import threading
 from threading import Lock
 
-from src.smplchat import settings
+from smplchat import settings
 
 __msg_queue: list[bytes] = []
 __msg_lock: Lock = threading.Lock()

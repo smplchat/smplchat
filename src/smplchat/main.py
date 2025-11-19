@@ -2,7 +2,7 @@
 import socket
 import time
 
-from src.smplchat import listener, settings
+from smplchat import listener, settings
 
 
 def main():
