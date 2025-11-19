@@ -1,5 +1,17 @@
 """ smplchat.message - message dataclasses are defined here """
 from dataclasses import dataclass
+from enum import IntEnum
+
+class MessageType(IntEnum):
+    """ Different types of allowed message types and corresponding int """
+    CHAT_RELAY = 0
+    JOIN_RELAY = 1
+    LEAVE_RELAY = 2
+    KEEPALIVE_RELAY = 3
+    JOIN_REQUEST = 128
+    JOIN_REPLY = 129
+    OLD_REQUEST = 130
+    OLD_REPLY = 131
 
 @dataclass
 class Message:
@@ -47,7 +59,7 @@ class JoinRequestMessage(Message):
 class JoinReplyMessage(Message):
     """ join reply message - informs newly joined client about history and ip:s"""
     old_message_ids: list[int]
-    ip_adresses: list[int]
+    ip_addresses: list[int]
 
 @dataclass
 class OldRequestMessage(Message):
