@@ -2,7 +2,8 @@
 import socket
 import time
 
-from smplchat import listener, settings
+from smplchat import settings
+from smplchat.listener import Listener
 
 
 def main():
@@ -22,7 +23,8 @@ def main():
     #		quit
     #		send message -> message-mangler
 
-    listener.start()
+    listener = Listener()
+    
     time.sleep(1)
 
     # Write to listener, simulates incoming messages, this will be replaced later
