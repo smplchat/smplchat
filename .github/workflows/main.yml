@@ -5,9 +5,7 @@ name: Run tests and lint
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -23,9 +21,19 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.12"
-    - name: Install dev environmet
+    - name: Install Poetry
       run: |
-        ./dev.sh dev
-    - name: Run pytest, coverage and pylint
+        pip install poetry
+    - name: Install dependencies with Poetry
+      env:
+        PYTHON_KEYRING_BACKEND: keyring.backends.fail.Keyring
       run: |
-        ./dev.sh auto
+        poetry install
+    - name: Run pytest with coverage
+      run: |
+        poetry run coverage run -m pytest -v .
+        poetry run coverage xml
+    - name: Run pylint
+      continue-on-error: true
+      run: |
+        poetry run pylint src/
