@@ -159,7 +159,7 @@ class UserInterface:
 	def _render_info(self) -> None:
 		self.info_win.erase()
 		_, info_w = self.info_win.getmaxyx()
-		status = f"\join to join the chat, \leave to leave the chat"
+		status = f"/join to join the chat, /leave to leave the chat"
 		try:
 			self.info_win.addnstr(0, 0, status, info_w -1)
 			self.info_win.addnstr(1, 0, "Enter=send   Ctrl-C=quit", info_w - 1)
