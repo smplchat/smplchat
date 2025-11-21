@@ -43,7 +43,7 @@ class MessageList:
         for rcv_uid in history:
             if self.find(rcv_uid) is None:
                 self.__messages.insert(pos, MessageEntry (
-                    uid = randrange(400000000), # should have common helper
+                    uid = rcv_uid,
                     seen = 0,
                     time = 0,
                     nick = "system",
@@ -51,7 +51,7 @@ class MessageList:
                 pos += 1
                 new_entries = True
         return new_entries
-            
+
 
     def __update_message(self, uid, time, nick, message):
         pos = self.find(uid)
