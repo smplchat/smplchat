@@ -31,6 +31,7 @@ def main():
     try:
         # curses
         # run_tui(msg_list, dispatcher, args.nick)
+        pass
     finally:
         # exit cleanup
         dispatcher.stop()
