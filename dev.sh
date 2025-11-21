@@ -61,7 +61,7 @@ case $1 in
 		;;
 
 	run)
-		DEBUG=1 poetry run smplchat
+		DEBUG=1 poetry run smplchat $2 $3 $4 $5 $6 $7 $8 $9
 		;;
 
 	pytest)
