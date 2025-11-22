@@ -1,6 +1,7 @@
 """ list - Provides message list and methods to manipulate it """
 from dataclasses import dataclass
 from smplchat.message import (
+    MessageType,
     Message,
     ChatRelayMessage,
     JoinRelayMessage,
@@ -16,11 +17,13 @@ class MessageEntry:
     
         Details:
         uid - unique ID of message
+        mtype - type of message
         seen - counter how many times message is added
         nick - the nick of sender
         message - message content
     """
     uid: int
+    mtype: int
     seen: int
     nick: str
     message: str
@@ -46,6 +49,7 @@ class MessageList:
             if self.find(rcv_uid) is None:
                 self.__messages.insert(pos, MessageEntry (
                     uid = rcv_uid,
+                    mtype = -1,
                     seen = 0,
                     nick = "system",
                     message = f"<{rcv_uid}> message pending" ) )
@@ -54,20 +58,22 @@ class MessageList:
         return new_entries
 
 
-    def __update_message(self, uid, nick, message):
+    def __update_message(self, uid, mtype, nick, message):
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
             seen = entry.seen
-            if seen > 0:
+            if seen > 0:	# Already seen only updating seen counter
                 self.__messages[pos] = MessageEntry (
                     uid = entry.uid,
+                    mtype = mtype,
                     seen = seen + 1,
                     nick = entry.nick,
                     message = entry.message )
                 return True
             self.__messages[pos] = MessageEntry (
                     uid = uid,
+                    mtype = mtype,
                     seen = 1,
                     nick = nick,
                     message = message )
@@ -75,29 +81,40 @@ class MessageList:
             return True
         return False
 
+    def __generate_message(self, msg_type, text):
+        """ generates message to be diplayed according message type """
+        match msg_type:
+            case MessageType.CHAT_RELAY:
+                return text
+            case MessageType.JOIN_RELAY:
+                return "*** joined the chat"
+            case MessageType.LEAVE_RELAY:
+                return "*** left the chat"
+        return ""
+
     def add(self, msg: Message):
         """ add - Adds message and its history to the list """
         if isinstance(msg,
                 (ChatRelayMessage, JoinRelayMessage, LeaveRelayMessage)):
             uid = msg.uniq_msg_id
             nick = msg.sender_nick
-            if isinstance(msg, ChatRelayMessage):
-                message = msg.msg_text
-            elif isinstance(msg, JoinRelayMessage):
-                message = "*** joined the chat"
-            elif isinstance(msg, LeaveRelayMessage):
-                message = "*** left the chat"
-            if self.__update_message(uid, nick, message):
-                self.__add_unseen_history(uid, msg.old_message_ids)
-                return False
+            mtype = ( msg.old_msg_type if hasattr(msg, "old_msg_type")
+                    else msg.msg_type )
+            text = msg.msg_text if hasattr(msg, "msg_text") else ""
+            message = self.__generate_message(mtype, text)
+            if self.__update_message(uid, mtype, nick, message):
+                if hasattr(msg, "old_message_ids"):
+                    self.__add_unseen_history(uid, msg.old_message_ids)
+                return True
 
             self.__messages.append(MessageEntry (
                 uid = uid,
+                mtype = mtype,
                 seen = 1,
                 nick = nick,
                 message = message ))
-
-            self.__add_unseen_history(uid, msg.old_message_ids)
+            if hasattr(msg, "old_message_ids"):
+                self.__add_unseen_history(uid, msg.old_message_ids)
             self.updated = True
             return True
 
@@ -116,6 +133,7 @@ class MessageList:
         uid = generate_uid()
         self.__messages.append(MessageEntry (
             uid = uid,
+            mtype = -2,
             seen = 1,
             nick = "system",
             message = text))

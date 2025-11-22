@@ -83,6 +83,6 @@ class OldReplyMessage(Message):
     """ old reply message - reply for old message request """
     msg_type: int
     old_msg_type: int
-    old_msg_id: int
-    old_sender_nick: str
-    old_msg_text: str
+    uniq_msg_id: int
+    sender_nick: str
+    msg_text: str

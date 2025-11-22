@@ -89,20 +89,20 @@ def packer(m: Message):
             m.uniq_msg_id)				# Q - 8 bytes
 
     if isinstance(m, OldReplyMessage):
-        old_sender_nick = m.old_sender_nick.encode()
-        old_msg_text = m.old_msg_text.encode()
+        sender_nick = m.sender_nick.encode()
+        msg_text = m.msg_text.encode()
         return pack(
             "=BBQLL"
-                f"{len(old_sender_nick)}s"
-                f"{len(old_msg_text)}s",
+                f"{len(sender_nick)}s"
+                f"{len(msg_text)}s",
             m.msg_type,					# B - 1 byte
             m.old_msg_type,				# B - 1 byte
-            m.old_msg_id,				# Q - 8 bytes
-            len(old_sender_nick),			# L - 4 bytes
-            len(old_msg_text),				# L - 4 bytes
+            m.uniq_msg_id,				# Q - 8 bytes
+            len(sender_nick),				# L - 4 bytes
+            len(msg_text),				# L - 4 bytes
 
-            old_sender_nick,				# ?s - ? chars (bytes)
-            old_msg_text)				# ?s - ? * chars
+            sender_nick,				# ?s - ? chars (bytes)
+            msg_text)					# ?s - ? * chars
 
     dprint("ERROR: message type not implemented")
     return None
@@ -214,25 +214,25 @@ def unpack_old_reply_message(data: bytes):
     """ unpacker for chat relay messages """
     (msg_type,			# B - 1 byte
         old_msg_type,		# B - 1 byte
-        old_msg_id,		# Q - 8 bytes
-        old_nick_length,	# L - 4 bytes
-        old_msg_length) = (	# L - 4 bytes
+        uniq_msg_id,		# Q - 8 bytes
+        nick_length,		# L - 4 bytes
+        msg_length) = (		# L - 4 bytes
             unpack_from("=BBQLL", data) )
     offset = 18
 
-    old_sender_nick = unpack_from(
-            f"={old_nick_length}s", data, offset=offset)[0].decode()
-    offset += old_nick_length
+    sender_nick = unpack_from(
+            f"={nick_length}s", data, offset=offset)[0].decode()
+    offset += nick_length
 
-    old_msg_text = unpack_from(
-            f"={old_msg_length}s", data, offset=offset)[0].decode()
+    msg_text = unpack_from(
+            f"={msg_length}s", data, offset=offset)[0].decode()
 
     return OldReplyMessage(
         msg_type = msg_type,
         old_msg_type = old_msg_type,
-        old_msg_id = old_msg_id,
-        old_sender_nick = old_sender_nick,
-        old_msg_text = old_msg_text )
+        uniq_msg_id = uniq_msg_id,
+        sender_nick = sender_nick,
+        msg_text = msg_text )
 
 
 def unpacker(data: bytes):

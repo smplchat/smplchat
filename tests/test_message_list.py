@@ -82,7 +82,7 @@ class TestMessageList(unittest.TestCase):
         self.ml = MessageList()
         self.add_chat1()
         self.assertEqual(self.ml.get(), [
-            MessageEntry( uid=3, seen=1,
+            MessageEntry( uid=3, mtype=0, seen=1,
             nick='tester', message='testing yeah') ])
 
     def test_addmore(self):
@@ -90,9 +90,9 @@ class TestMessageList(unittest.TestCase):
         self.add_chat1()
         self.add_chat2()
         self.assertEqual(self.ml.get(), [
-            MessageEntry( uid=3, seen=1,
+            MessageEntry( uid=3, mtype=0, seen=1,
             nick='tester', message='testing yeah'),
-            MessageEntry( uid=5, seen=1,
+            MessageEntry( uid=5, mtype=0, seen=1,
             nick='tester2', message='testing hell yeah'),
              ])
 
@@ -103,24 +103,24 @@ class TestMessageList(unittest.TestCase):
         self.add_join()
         self.add_leave()
         self.assertEqual(self.ml.get(), [
-            MessageEntry( uid=3, seen=1,
+            MessageEntry( uid=3, mtype=0, seen=1,
             nick='tester', message='testing yeah'),
-            MessageEntry( uid=5, seen=1,
+            MessageEntry( uid=5, mtype=0, seen=1,
             nick='tester2', message='testing hell yeah'),
-            MessageEntry(uid=4, seen=1,
+            MessageEntry(uid=4, mtype=1, seen=1,
             nick='joiner', message='*** joined the chat'),
-            MessageEntry(uid=9, seen=1,
+            MessageEntry(uid=9, mtype=2, seen=1,
             nick='leaver', message='*** left the chat') ])
 
     def test_history_add(self):
         self.ml = MessageList()
         self.add_chat_with_history()
         self.assertEqual(self.ml.get(), [
-            MessageEntry( uid=3, seen=0,
+            MessageEntry( uid=3, mtype=-1, seen=0,
             nick='system', message='<3> message pending'),
-            MessageEntry( uid=5, seen=0,
+            MessageEntry( uid=5, mtype=-1, seen=0,
             nick='system', message='<5> message pending'),
-            MessageEntry(uid=55, seen=1,
+            MessageEntry(uid=55, mtype=0, seen=1,
             nick='hisory-person', message='history testing')])
 
     def test_history_filled(self):
@@ -128,11 +128,11 @@ class TestMessageList(unittest.TestCase):
         self.add_chat_with_history()
         self.add_chat1()
         self.assertEqual(self.ml.get(), [
-            MessageEntry( uid=3, seen=1,
+            MessageEntry( uid=3, mtype=0, seen=1,
             nick='tester', message='testing yeah'),
-            MessageEntry( uid=5, seen=0,
+            MessageEntry( uid=5, mtype=-1, seen=0,
             nick='system', message='<5> message pending'),
-            MessageEntry(uid=55, seen=1,
+            MessageEntry(uid=55, mtype=0, seen=1,
             nick='hisory-person', message='history testing')])
 
     def test_history_of_history_filled(self):
@@ -141,13 +141,13 @@ class TestMessageList(unittest.TestCase):
         self.add_chat_with_history()
         self.add_chat2()
         self.assertEqual(self.ml.get(), [
-            MessageEntry( uid=3, seen=0,
+            MessageEntry( uid=3, mtype=-1, seen=0,
             nick='system', message='<3> message pending'),
-            MessageEntry( uid=5, seen=1,
+            MessageEntry( uid=5, mtype=0, seen=1,
             nick='tester2', message='testing hell yeah'),
-            MessageEntry(uid=55, seen=1,
+            MessageEntry(uid=55, mtype=0, seen=1,
             nick='hisory-person', message='history testing'),
-            MessageEntry(uid=81, seen=1,
+            MessageEntry(uid=81, mtype=0, seen=1,
             nick='hisory-person2', message='history of history testing')])
 
     def test_seen_counter(self):
@@ -156,7 +156,7 @@ class TestMessageList(unittest.TestCase):
         self.add_chat1()
         self.add_chat1()
         self.assertEqual(self.ml.get(), [
-            MessageEntry( uid=3, seen=3,
+            MessageEntry( uid=3, mtype=0, seen=3,
             nick='tester', message='testing yeah') ])
 
     def test_join_reply(self):
@@ -164,13 +164,13 @@ class TestMessageList(unittest.TestCase):
         self.add_join_reply()
         self.assertEqual( [ str(x.message) for x in self.ml.get() ],
             [ str(x.message) for x in [
-                MessageEntry( uid=3, seen=0,
+                MessageEntry( uid=3, mtype=-1, seen=0,
                 nick='system', message='<3> message pending'),
-                MessageEntry(uid=5, seen=0,
+                MessageEntry(uid=5, mtype=-1, seen=0,
                 nick='system', message='<5> message pending'),
-                MessageEntry(uid=9, seen=0,
+                MessageEntry(uid=9, mtype=-1, seen=0,
                 nick='system', message='<9> message pending'),
-                MessageEntry(uid=0, seen=1,
+                MessageEntry(uid=0, mtype=1, seen=1,
                 nick='system', message='*** Join request succesful') ] ] )
 
     def test_unsupported(self):

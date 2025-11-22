@@ -82,9 +82,9 @@ class TestPacker(unittest.TestCase):
             tm = OldReplyMessage(
                 msg_type = MessageType.OLD_REPLY,
                 old_msg_type = choice(list(MessageType)),
-                old_msg_id = randrange(0,99999999),
-                old_sender_nick = "".join(chr(randrange(1,4000))
+                uniq_msg_id = randrange(0,99999999),
+                sender_nick = "".join(chr(randrange(1,4000))
                         for x in range(randrange(70))),
-                old_msg_text = "".join(chr(randrange(1,4000))
+                msg_text = "".join(chr(randrange(1,4000))
                         for x in range(randrange(2000))) )
             self.assertEqual(tm, unpacker(packer(tm)))
