@@ -16,4 +16,3 @@ def dprint(*args, **kwargs):
     """ dprint - just as print, but prints to stderr only if DEBUG is defined """
     if DEBUG:
         print(*args, **kwargs, file=stderr)
-    

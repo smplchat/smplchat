@@ -83,9 +83,9 @@ class MessageList:
 
     def add(self, msg: Message):
         """ add - Adds message and its history to the list """
-        uid = msg.uniq_msg_id
         if isinstance(msg,
                 (ChatRelayMessage, JoinRelayMessage, LeaveRelayMessage)):
+            uid = msg.uniq_msg_id
             time = msg.sender_local_time
             nick = msg.sender_nick
             if isinstance(msg, ChatRelayMessage):
