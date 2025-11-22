@@ -4,7 +4,12 @@ from smplchat.packet_mangler import (
     Message,
     ChatRelayMessage,
     JoinRelayMessage,
-    LeaveRelayMessage)
+    LeaveRelayMessage,
+    JoinReplyMessage)
+from smplchat.utils import (
+    generate_uid,
+    get_time_from_uid,
+    dprint )
 
 @dataclass
 class MessageEntry:
@@ -103,7 +108,22 @@ class MessageList:
             self.__add_unseen_history(uid, msg.old_message_ids)
             self.updated = True
             return True
-        return True
+
+        if isinstance(msg, JoinReplyMessage):
+            uid = generate_uid()
+            self.__messages.append(MessageEntry (
+                uid = uid,
+                seen = 1,
+                time = get_time_from_uid(uid),
+                nick = "system",
+                message = "*** Join request succesful"))
+            self.__add_unseen_history(uid, msg.old_message_ids)
+            self.updated = True
+            return True
+
+        dprint("ERROR: Message type is not supported by MessagList")
+        dprint(msg)
+        return False
 
 
     def find(self, uid: int):
