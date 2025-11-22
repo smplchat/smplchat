@@ -43,15 +43,14 @@ class Dispatcher:
         self.listener = listener
         self.msg_list = message_list
         self.nick = nick
+        self.self_addr = self_addr
         self.poll_interval = poll_interval
-        self.connected = True
 
         if self_addr is None or nick is None:
             raise ValueError("self_addr and nick required")
-
-        # own address
-        host, port = self_addr
-        self.self_addr = (host, int(port))
+        
+        # this is a boolean for whether we are in a peer group or just open for one
+        self.connected = True
 
         # convert own address IP into int
         self.self_ip_int = _ip_to_int(self.self_addr[0])
@@ -70,8 +69,7 @@ class Dispatcher:
 
     def add_peer(self, addr):
         """Add peer, ignoring duplicates and self."""
-        host, port = addr
-        peer = (host, int(port))
+        peer = addr
 
         if peer == self.self_addr:
             return
@@ -82,8 +80,7 @@ class Dispatcher:
 
     def remove_peer(self, addr):
         """Remove peer."""
-        host, port = addr
-        peer = (host, int(port))
+        peer = addr
         if peer in self.peers:
             self.peers.remove(peer)
             dprint("dispatcher: removed peer", peer)
