@@ -184,4 +184,9 @@ class TestMessageList(unittest.TestCase):
         self.ml = MessageList()
         self.add_join_request()
         self.assertEqual(self.ml.get(), [] )
-        
+
+    def test_sys_message(self):
+        self.ml = MessageList()
+        self.ml.sys_message("joopajoo")
+        self.assertEqual(self.ml.get()[0].message, "joopajoo")
+        self.assertEqual(self.ml.get()[0].nick, "system")
