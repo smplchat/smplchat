@@ -80,10 +80,10 @@ class UserInterface:
         self._windows.input_win = self._windows.stdscr.derwin(input_h, w, msg_h + info_h, 0)
         self._windows.msg_win.scrollok(True)
 
-    def update(self):
+    def update(self, username):
         """ Render windows with new messages and of info, process user input.
         Returns completed input string if user has pressed enter. """
-
+        self.username = username
         if not self._state.initialized:
             raise RuntimeError("UI not started; call start() first")
 
@@ -200,7 +200,7 @@ class UserInterface:
     def _render_input(self) -> None:
         """ renders user input """
         self._windows.input_win.erase()
-        ph = "> "
+        ph = f"{self.username}> "
         _, input_w = self._windows.input_win.getmaxyx()
         disp = ph + self._state.input_buffer
         try:

@@ -41,7 +41,7 @@ def main():
         #	if msg_list.is_seen:
         #          dispatcher.send(message)
         ip_list.update()
-        intxt = tui.update()
+        intxt = tui.update(nick)
         if intxt is None:
             continue
         if intxt.startswith("/nick"):
