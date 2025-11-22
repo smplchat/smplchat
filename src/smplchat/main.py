@@ -4,7 +4,7 @@ from smplchat.argparsing import parse_args, parse_host_port, parse_partners
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList
 from smplchat.dispatcher import Dispatcher
-# from smplchat.tui import run_tui
+#from smplchat.tui import run_tui
 
 def main():
     """ Main - the entry point to the application. Chat interface TUI, but started via CLI args. """
@@ -26,11 +26,13 @@ def main():
         self_addr=self_addr,
     )
 
-    dispatcher.send_join()
+    # backwards compatibility with full CLI start using --partners
+    if peers:
+        dispatcher.send_join()
 
     try:
         # curses
-        # run_tui(msg_list, dispatcher, args.nick)
+        #run_tui(msg_list, dispatcher, args.nick)
         pass
     finally:
         # exit cleanup

@@ -44,6 +44,7 @@ class Dispatcher:
         self.msg_list = message_list
         self.nick = nick
         self.poll_interval = poll_interval
+        self.connected = True
 
         # own address
         self.self_addr = None
@@ -111,6 +112,9 @@ class Dispatcher:
             except Exception:
                 old_ids = []
 
+        if msg_type == MessageType.JOIN_RELAY:
+            self.connected = True
+
         msg = msg_cls(
             msg_type=msg_type,
             uniq_msg_id=_new_uid(),
@@ -144,6 +148,18 @@ class Dispatcher:
             MessageType.LEAVE_RELAY,
         )
 
+    def leave_chat(self):
+        """Leave chat but not app."""
+        if not self.connected:
+            return
+
+        # leave notice
+        self.send_leave()
+
+        # no gossiping
+        self.connected = False
+        self.peers.clear()
+
     def _loop(self):
         """Actual loop for incoming packets."""
         while not self._stop:
@@ -163,6 +179,10 @@ class Dispatcher:
             dprint("dispatcher: unpack failed:", e)
             return
 
+        if not self.connected:
+            return
+
+        # for now leave adds peer, but it shouldn't once the leave message gets further refined
         if isinstance(msg, (ChatRelayMessage, JoinRelayMessage, LeaveRelayMessage)):
             self.add_peer(addr)
             self._handle_relay(msg)
@@ -185,6 +205,9 @@ class Dispatcher:
 
     def _broadcast(self, msg):
         """Send message to others via UDP."""
+        if not self.connected:
+            return
+
         data = packer(msg)
         if not data:
             return
