@@ -3,7 +3,7 @@ import unittest
 from smplchat.message_list import (
     MessageList,
     MessageEntry )
-from smplchat.packet_mangler import (
+from smplchat.message import (
     ChatRelayMessage,
     JoinRelayMessage,
     LeaveRelayMessage,

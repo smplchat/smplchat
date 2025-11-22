@@ -8,14 +8,13 @@ import time
 import threading
 
 from smplchat.utils import dprint, generate_uid
-from smplchat.packet_mangler import (
+from smplchat.message import (
     MessageType,
     ChatRelayMessage,
     JoinRelayMessage,
-    LeaveRelayMessage,
-    packer,
-    unpacker,
+    LeaveRelayMessage
 )
+from smplchat.packet_mangler import packer, unpacker
 
 def _ip_to_int(ip_str):
     """Convert string to int for packet mangler."""

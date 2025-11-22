@@ -1,6 +1,6 @@
 """ list - Provides message list and methods to manipulate it """
 from dataclasses import dataclass
-from smplchat.packet_mangler import (
+from smplchat.message import (
     Message,
     ChatRelayMessage,
     JoinRelayMessage,

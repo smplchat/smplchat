@@ -1,6 +1,6 @@
 """ smplchat.message_gen - functions to generate messages """
-from smplchat.packet_mangler import ChatRelayMessage
-from .utils import generate_uid
+from smplchat.utils import generate_uid
+from .message import ChatRelayMessage
 
 def new_message(nick, text, ip, msg_list):
     """ Generates new message. TODO: move this in better place """

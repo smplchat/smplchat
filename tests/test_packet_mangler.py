@@ -2,6 +2,7 @@ import unittest
 from random import randrange, choice
 
 from smplchat.packet_mangler import *
+from smplchat.message import *
 
 class TestPacker(unittest.TestCase):
     def test_chat_relay_message(self):

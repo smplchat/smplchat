@@ -4,7 +4,7 @@ from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
 from smplchat.tui import UserInterface
-from .message_gen import new_message
+from smplchat.message import new_message
 
 def main():
     """ main - the entry point to the application """
