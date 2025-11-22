@@ -8,6 +8,8 @@ from smplchat.dispatcher import Dispatcher
 def main():
     """ main - the entry point to the application """
 
+    print("Welcome to smplchat!")
+
     # prompt nickname
     nick = prompt_nick()
 

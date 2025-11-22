@@ -8,7 +8,7 @@ import time
 import random
 import threading
 
-from smplchat.settings import PORT, dprint
+from smplchat.settings import dprint
 from smplchat.packet_mangler import (
     MessageType,
     ChatRelayMessage,
@@ -36,7 +36,7 @@ class Dispatcher:
         listener,
         message_list,
         peers=None,
-        nick="anon",
+        nick=None,
         self_addr=None,
         poll_interval=0.05,
     ):
@@ -46,24 +46,15 @@ class Dispatcher:
         self.poll_interval = poll_interval
         self.connected = True
 
+        if self_addr is None or nick is None:
+            raise ValueError("self_addr and nick required")
+
         # own address
-        self.self_addr = None
-        if self_addr:
-            if isinstance(self_addr, tuple):
-                host, port = self_addr
-            else:
-                if ":" in self_addr:
-                    host, port_s = self_addr.rsplit(":", 1)
-                    port = int(port_s)
-                else:
-                    host, port = self_addr, PORT
-            self.self_addr = (host, int(port))
+        host, port = self_addr
+        self.self_addr = (host, int(port))
 
         # convert own address IP into int
-        if self.self_addr:
-            self.self_ip_int = _ip_to_int(self.self_addr[0])
-        else:
-            self.self_ip_int = 0
+        self.self_ip_int = _ip_to_int(self.self_addr[0])
 
         # peers
         self.peers: list[tuple[str, int]] = []
@@ -79,13 +70,10 @@ class Dispatcher:
 
     def add_peer(self, addr):
         """Add peer, ignoring duplicates and self."""
-        if isinstance(addr, tuple):
-            host, port = addr
-        else:
-            host, port = addr, PORT
+        host, port = addr
         peer = (host, int(port))
 
-        if self.self_addr and peer == self.self_addr:
+        if peer == self.self_addr:
             return
 
         if peer not in self.peers:
@@ -94,10 +82,7 @@ class Dispatcher:
 
     def remove_peer(self, addr):
         """Remove peer."""
-        if isinstance(addr, tuple):
-            host, port = addr
-        else:
-            host, port = addr, PORT
+        host, port = addr
         peer = (host, int(port))
         if peer in self.peers:
             self.peers.remove(peer)

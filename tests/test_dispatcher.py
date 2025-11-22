@@ -11,7 +11,8 @@ def test_dispatcher_startup():
         listener=listener,
         message_list=msg_list,
         peers=[("127.0.0.1", 62741)],
-        nick="testuser"
+        nick="testuser",
+        self_addr=("127.0.0.1", 62740)
     )
 
     assert dispatcher.nick == "testuser"
@@ -28,7 +29,8 @@ def test_send_chat_message_works():
     dispatcher = Dispatcher(
         listener=listener,
         message_list=msg_list,
-        nick="bobrikov"
+        nick="bobrikov",
+        self_addr=("127.0.0.1", 62742)
     )
 
     dispatcher.send_chat("test")
@@ -50,7 +52,8 @@ def test_add_peer():
     dispatcher = Dispatcher(
         listener=listener,
         message_list=msg_list,
-        self_addr=("127.0.0.1", 62744)
+        self_addr=("127.0.0.1", 62744),
+        nick="testuser"
     )
 
     assert len(dispatcher.peers) == 0
