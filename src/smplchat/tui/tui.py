@@ -1,84 +1,95 @@
+""" tui.py - a simple user interface for smplchat """
 import curses
 import locale
+from types import SimpleNamespace
+
+from smplchat import settings
 
 class UserInterface:
-    def __init__(self, msg_list: list, username):
-        self.msg_list = msg_list
+    """ class for capturing user inputs and rendering
+        received messages """
+    def __init__(self, messages: list[str], username: str):
+        self.messages = messages
         self.username = username
 
-        # curses objects
-        self.stdscr = None
-        self.msg_win = None
-        self.info_win = None
-        self.input_win = None
+        # curses window objects
+        self._windows = SimpleNamespace (
+            stdscr=None,
+            msg_win=None,
+            info_win=None,
+            input_win=None,
+        )
 
-        # input state
-        self.input_buffer: str = ""
-        self.cursor_pos: int = 0
-
-        # layout cache - what is this?
-        self._h = self._w = 0 # terminal size?
-        self._initialized = False
+        # input/layout state (cursor position, terminal size)
+        self._state = SimpleNamespace (
+            input_buffer="",
+            cursor_pos=0,
+            h=0,
+            w=0,
+            initialized=False,
+        )
 
     def start(self) -> None:
         """ Initialize curses and create windows. """
         # try to get the locale right for UTF-8
         try:
             locale.setlocale(locale.LC_ALL, "")
-        except Exception:
+        except locale.Error:
             pass
 
-        self.stdscr = curses.initscr()
+        self._windows.stdscr = curses.initscr()
         curses.noecho()
         curses.cbreak()
-        self.stdscr.keypad(True)
-        self.stdscr.nodelay(True)
+        self._windows.stdscr.keypad(True)
+        self._windows.stdscr.nodelay(True)
         try:
             # setting cursor to visible
             curses.curs_set(1)
-        except Exception:
+        except curses.error:
             pass
 
         self._setup_windows()
-        self._initialized = True
+        self._state.initialized = True
 
     def stop(self) -> None:
         """Restore terminal state."""
-        if not self._initialized:
+        if not self._state.initialized:
             return
-        try: curses.curs_set(1)
-        except Exception:
+        try:
+            curses.curs_set(1)
+        except curses.error:
             pass
 
-        self.stdscr.keypad(False)
+        self._windows.stdscr.keypad(False)
         curses.nocbreak()
         curses.echo()
         curses.endwin()
-        self._initialized = False
+        self._state.initialized = False
 
     def _setup_windows(self) -> None:
-        h, w = self.stdscr.getmaxyx()
-        self._h, self._w = h, w
+        h, w = self._windows.stdscr.getmaxyx()
+        self._state.h, self._state.w = h, w
         info_h, input_h = 3, 3
         msg_h = h - info_h - input_h
-        self.msg_win = self.stdscr.derwin(msg_h, w, 0, 0)
-        self.info_win = self.stdscr.derwin(info_h, w, msg_h, 0)
-        self.input_win = self.stdscr.derwin(input_h, w, msg_h + info_h, 0)
-        self.msg_win.scrollok(True)
+        self._windows.msg_win = self._windows.stdscr.derwin(msg_h, w, 0, 0)
+        self._windows.info_win = self._windows.stdscr.derwin(info_h, w, msg_h, 0)
+        self._windows.input_win = self._windows.stdscr.derwin(input_h, w, msg_h + info_h, 0)
+        self._windows.msg_win.scrollok(True)
 
     def update(self):
         """ Render windows with new messages and of info, process user input.
         Returns completed input string if user has pressed enter. """
 
-        if not self._initialized:
+        if not self._state.initialized:
             raise RuntimeError("UI not started; call start() first")
 
         # handle window having been resized
-        h, w = self.stdscr.getmaxyx()
-        if (h, w) != (self._h, self._w):
+        h, w = self._windows.stdscr.getmaxyx()
+        if (h, w) != (self._state.h, self._state.w):
             self._setup_windows()
 
         # read available key presses and update input_buffer
+        # completed = self._handle_input()
         completed = self._handle_input()
         self._render_all()
         return completed
@@ -86,121 +97,128 @@ class UserInterface:
     def _handle_input(self):
         completed = None
         while True:
-            ch = self.stdscr.getch()
+            try:
+                ch = self._windows.stdscr.get_wch()
+                settings.dprint("type, repr ch: ", type(ch), repr(ch))
             # no input
-            if ch == -1:
+            except curses.error:
                 break
             # is enter
-            if ch in (curses.KEY_ENTER, 10, 13):
-                text = self.input_buffer.strip()
-                self.input_buffer = ""
-                self.cursor_pos = 0
+            if ch == "\n":
+                text = self._state.input_buffer.strip()
+                self._state.input_buffer = ""
+                self._state.cursor_pos = 0
                 if text:
                     completed = text
                 break
             # is backspace
             if ch in (curses.KEY_BACKSPACE, 127, 0):
-                if self.cursor_pos > 0:
-                    self.input_buffer = (
-                        self.input_buffer[: self.cursor_pos -1]
-                        + self.input_buffer[self.cursor_pos :]
+                if self._state.cursor_pos > 0:
+                    self._state.input_buffer = (
+                        self._state.input_buffer[: self._state.cursor_pos -1]
+                        + self._state.input_buffer[self._state.cursor_pos :]
                     )
-                    self.cursor_pos -= 1
+                    self._state.cursor_pos -= 1
                 continue
             # is left/right arrow
             if ch == curses.KEY_LEFT:
-                self.cursor_pos = max(0, self.cursor_pos - 1)
+                self._state.cursor_pos = max(0, self._state.cursor_pos - 1)
                 continue
             if ch == curses.KEY_RIGHT:
-                self.cursor_pos = min(len(self.input_buffer), self.cursor_pos + 1)
+                self._state.cursor_pos = min(
+                    len(self._state.input_buffer),
+                    self._state.cursor_pos + 1
+                    )
                 continue
             # is Ctrl-C / Ctrl-D
-            if ch in (3, 4):
+            if ch in (3, '\x03'):
                 raise KeyboardInterrupt
+                # TODO: change behaviour to a graceful exit # pylint: disable=fixme
+            # some special keys, or up/down arrow
+            if isinstance(ch, int):
+                continue
             # is printable
-            if 0 <= ch < 256:
-                c = chr(ch)
-                if not c.isprintable():
-                    continue
-                self.input_buffer = (
-                    self.input_buffer[: self.cursor_pos]
-                    + c
-                    + self.input_buffer[self.cursor_pos :]
+            if ch.isprintable():
+                self._state.input_buffer = (
+                    self._state.input_buffer[: self._state.cursor_pos]
+                    + ch
+                    + self._state.input_buffer[self._state.cursor_pos :]
                 )
-                self.cursor_pos += 1
+                self._state.cursor_pos += 1
         return completed
 
     def _render_all(self) -> None:
-        self.stdscr.erase()
+        self._windows.stdscr.erase()
         self._render_messages()
         self._render_info()
         self._render_input()
         # flush the virtual screen to physical screen
         try:
             curses.doupdate()
-        except Exception:
+        except curses.error:
             pass
 
     def _render_messages(self) -> None:
-        self.msg_win.erase()
-        lines = [msg for msg in self.msg_list]
-        msg_h, msg_w = self.msg_win.getmaxyx()
+        """ renders messages to message-window"""
+        self._windows.msg_win.erase()
+        lines = self.messages
+        msg_h, msg_w = self._windows.msg_win.getmaxyx()
         start = max(0, len(lines) - msg_h)
         shown = lines[start: start + msg_h]
         for i, line in enumerate(shown):
             try:
-                self.msg_win.addnstr(i, 0, line, msg_w - 1)
-            # msg/line too long?
+                self._windows.msg_win.addnstr(i, 0, line, msg_w - 1)
+            # if something goes wrong
             except curses.error:
                 pass
-        self.msg_win.noutrefresh()
+        self._windows.msg_win.noutrefresh()
 
 
     def _render_info(self) -> None:
-        self.info_win.erase()
-        _, info_w = self.info_win.getmaxyx()
-        status = f"/join to join the chat, /leave to leave the chat"
+        """ renders text to info-window """
+        self._windows.info_win.erase()
+        _, info_w = self._windows.info_win.getmaxyx()
+        status = "/join to join the chat, /leave to leave the chat"
         try:
-            self.info_win.addnstr(0, 0, status, info_w -1)
-            self.info_win.addnstr(1, 0, "Enter=send   Ctrl-C=quit", info_w - 1)
+            self._windows.info_win.addnstr(0, 0, status, info_w -1)
+            self._windows.info_win.addnstr(1, 0, "Enter=send   Ctrl-C=quit", info_w - 1)
         except curses.error:
             pass
-        self.info_win.noutrefresh()
+        self._windows.info_win.noutrefresh()
 
     def _render_input(self) -> None:
-        self.input_win.erase()
+        """ renders user input """
+        self._windows.input_win.erase()
         ph = "> "
-        _, input_w = self.input_win.getmaxyx()
-        disp = ph + self.input_buffer
+        _, input_w = self._windows.input_win.getmaxyx()
+        disp = ph + self._state.input_buffer
         try:
-            self.input_win.addnstr(0, 0, disp, input_w - 1)
+            self._windows.input_win.addnstr(0, 0, disp, input_w - 1)
             # move cursor
-            curs_x = min(len(ph) + self.cursor_pos, input_w - 1)
-            self.input_win.move(0, curs_x)
+            curs_x = min(len(ph) + self._state.cursor_pos, input_w - 1)
+            self._windows.input_win.move(0, curs_x)
         except curses.error:
             pass
-        self.input_win.noutrefresh()
+        self._windows.input_win.noutrefresh()
 
 if __name__ == "__main__":
     import time
 
     msg_list = [
-        f"Aku: Hei vaan kaikille!",
-        f"Iines: No tervepä terve, mitäs sinne?",
-        f"Aku: Kylmiä ilmoja on pidellyt, luita kolottaa."
+        "Aku: Hei vaan kaikille!",
+        "Iines: No tervepä terve, mitäs sinne?",
+        "Aku: Kylmiä ilmoja on pidellyt, luita kolottaa."
     ]
     window = UserInterface(msg_list, "Testaaja")
     window.start()
 
     try:
         while True:
-            completed = window.update()
-            if completed:
-                msg_list.append(f"{window.username}: {completed}")
+            new_msg = window.update()
+            if new_msg:
+                msg_list.append(f"{window.username}: {new_msg}")
             time.sleep(0.05)
     except KeyboardInterrupt:
         pass
     finally:
         window.stop()
-
-
