@@ -1,6 +1,6 @@
 """ main.py - smplchat """
 from smplchat import settings
-from smplchat.argparsing import parse_args, parse_host_port, parse_partners
+from smplchat.input_utils import parse_host_port, prompt_nick, prompt_self_addr
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList
 from smplchat.dispatcher import Dispatcher
@@ -8,10 +8,15 @@ from smplchat.dispatcher import Dispatcher
 
 def main():
     """ Main - the entry point to the application. Chat interface TUI, but started via CLI args. """
-    args = parse_args()
 
-    self_addr = parse_host_port(args.self_addr) if args.self_addr else None
-    peers = parse_partners(args.partners)
+    # prompt nickname
+    nick = prompt_nick()
+
+    # prompt address or use default
+    self_addr_str = prompt_self_addr()
+    self_addr = parse_host_port(self_addr_str) if self_addr_str else None
+
+    peers = []
 
     listen_port = self_addr[1] if self_addr else settings.PORT
 
@@ -22,18 +27,14 @@ def main():
         listener=listener,
         message_list=msg_list,
         peers=peers,
-        nick=args.nick,
+        nick=nick,
         self_addr=self_addr,
     )
 
-    # backwards compatibility with full CLI start using --partners
-    if peers:
-        dispatcher.send_join()
-
     try:
         # curses
-        #run_tui(msg_list, dispatcher, args.nick)
-        pass
+        #run_tui(msg_list, dispatcher, nick)
+        pass # remove once dui done
     finally:
         # exit cleanup
         dispatcher.stop()
