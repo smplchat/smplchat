@@ -5,6 +5,7 @@ from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
 from smplchat.tui import UserInterface
 from smplchat.message import new_message
+from smplchat.client_list import ClientList
 
 def main():
     """ main - the entry point to the application """
@@ -18,6 +19,9 @@ def main():
     self_addr = prompt_self_addr()
 
     # core
+
+    ip_list = ClientList(self_addr) # Initialize ip-list
+
     listener = Listener(port=self_addr[1])
     msg_list = MessageList()
     initial_messages(msg_list) # adds some helpful messages to the list
@@ -36,6 +40,7 @@ def main():
         #    if msg.type < 128: #relay message
         #	if msg_list.is_seen:
         #          dispatcher.send(message)
+        ip_list.update()
         intxt = tui.update()
         if intxt is None:
             continue
