@@ -104,7 +104,6 @@ class UserInterface:
         while True:
             try:
                 ch = self._windows.stdscr.get_wch()
-                dprint("type, repr ch: ", type(ch), repr(ch))
             # no input
             except curses.error:
                 break
