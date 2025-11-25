@@ -160,7 +160,6 @@ class UserInterface:
         return completed
 
     def _render_all(self) -> None:
-        self._windows.stdscr.erase()
         self._render_messages()
         self._render_info()
         self._render_input()
