@@ -37,36 +37,35 @@ def main():
 
     try:
         while True:
-            #for rx_msg in listener.update():
+            #for remote_ip, rx_msg in listener.update():
             #    msg = unpacker(rx_msg)
-            #    if msg.type < 128: #relay message
-            #	if msg_list.is_seen:
-            #          dispatcher.send(message)
+            #    if msg.msg_type < 128: #relay message
+            #	     if msg_list.is_seen:
+            #            dispatcher.send(message)
             ip_list.update()
             intxt = tui.update(nick)
             if intxt is None:
-                continue
-            if intxt.startswith("/nick"):
-                nick = intxt.split()[1]
-                continue
-            if intxt.startswith("/quit"):
+                pass
+            elif intxt.startswith("/quit"):
                 msg = new_message(msg_type=MessageType.LEAVE_RELAY, nick=nick,
                         ip=self_addr, msg_list=msg_list)
                 #    dispatcher.send(msg)
                 #    msg_list.add(msg)
                 tui.stop()
                 break
-            if intxt.startswith("/join"):
+            elif intxt.startswith("/nick"):
+                nick = intxt.split()[1]
+            elif intxt.startswith("/join"):
                 msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
                 remote_ip = intxt.split()[1]
                 #    dispatcher.send(msg)
                 msg_list.sys_message(f"*** Join request sent to {remote_ip}")
-                continue
+            else: # only text to send
 
-            msg = new_message(msg_type=MessageType.CHAT_RELAY, nick=nick,
-                    text=intxt, ip=self_addr, msg_list=msg_list)
-            msg_list.add(msg)
-            #dispatcher.send(msg)
+                msg = new_message(msg_type=MessageType.CHAT_RELAY, nick=nick,
+                        text=intxt, ip=self_addr, msg_list=msg_list)
+                msg_list.add(msg)
+                #dispatcher.send(msg)
     finally:
         # exit cleanup
         dispatcher.stop()
