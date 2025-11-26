@@ -1,7 +1,8 @@
 """start input helper, could be in some misc or utils folder too"""
 from smplchat import settings
 
-def parse_host_port(s):
+
+def parse_host_port(s: str) -> tuple[str, int]:
     """Parse host:port or host."""
     if ":" in s:
         host, port_s = s.rsplit(":", 1)

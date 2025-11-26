@@ -3,18 +3,18 @@
 # pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-positional-arguments,broad-exception-caught
 
 import socket
-import struct
-import time
 import threading
+import time
 
-from smplchat.utils import dprint, generate_uid
 from smplchat.message import (
     MessageType,
     ChatRelayMessage,
     JoinRelayMessage,
-    LeaveRelayMessage
+    LeaveRelayMessage,
+    JoinRequestMessage
 )
 from smplchat.packet_mangler import packer, unpacker
+from smplchat.utils import dprint, generate_uid
 
 
 class Dispatcher:
@@ -40,8 +40,10 @@ class Dispatcher:
         # this is a boolean for whether we are in a peer group or just open for one
         self.connected = True
 
-        # socket from listener for peer discovery (couldn't manage it with separate)
-        self.sock = self.listener.sock
+        # convert own address IP into int
+        self.self_ip_int = self.self_ip
+
+        self.sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
         self._stop = False
         self._thread = threading.Thread(target=self._loop, daemon=True)
@@ -78,7 +80,10 @@ class Dispatcher:
             msg_text=text,
         )
 
-    def send_join(self):
+    def send_join_request(self):
+        JoinRequestMessage(MessageType.JOIN_REQUEST, generate_uid(), self.nick)
+
+    def send_join_relay(self):
         """Join message."""
         self._make_and_send(
             JoinRelayMessage,
@@ -167,6 +172,7 @@ class Dispatcher:
     def stop(self):
         """Stops the thread."""
         self._stop = True
+        self.sock.close()
         try:
             self._thread.join(timeout=1)
         except RuntimeError:

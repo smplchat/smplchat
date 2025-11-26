@@ -31,8 +31,3 @@ def get_my_ip():
     s.close()
     return ip
 
-def ip_to_int(data: bytes):
-    return struct.unpack("=L", data)[0]
-
-def int_to_ip(n: int):
-    return struct.pack("=L", n)

@@ -5,7 +5,7 @@ from smplchat.dispatcher import Dispatcher
 from smplchat.client_list import ClientList
 
 def test_dispatcher_startup():
-    listener = Listener(port=62740)
+    listener = Listener("")
     msg_list = MessageList()
     ip_list = ClientList(("127.0.0.1", 62740))
 
@@ -35,7 +35,7 @@ def test_dispatcher_startup():
     assert not dispatcher._thread.is_alive()
 
 def test_send_chat_message_works():
-    listener = Listener(port=62742)
+    listener = Listener("")
     msg_list = MessageList()
     ip_list = ClientList(("127.0.0.1", 62742))
 
@@ -61,7 +61,7 @@ def test_send_chat_message_works():
 
 def test_add_and_remove_peer():
     """This was a test for dispatcher's peerlist. Now this remnant ended up testing clientlist through dispatcher."""
-    listener = Listener(port=62744)
+    listener = Listener("")
     msg_list = MessageList()
     ip_list = ClientList(("127.0.0.1", 62744))
 
