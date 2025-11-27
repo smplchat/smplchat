@@ -1,9 +1,7 @@
 """ smplchat.settings - Contains global settings like default ports """
 from os import getenv
 
-try:
-    DEBUG
-except NameError:
+if "DEBUG" not in globals():
     DEBUG = getenv("DEBUG")
 
 PORT = 62733
