@@ -16,39 +16,29 @@ from smplchat.message import (
 )
 from smplchat.packet_mangler import packer, unpacker
 
-def _ip_to_int(ip_str):
-    """Convert string to int for packet mangler."""
-    try:
-        return struct.unpack("!L", socket.inet_aton(ip_str))[0]
-    except OSError:
-        return 0
 
 class Dispatcher:
     """Dispatcher for handling packets that the listener has put in a queue."""
     def __init__(
-        self,
-        listener,
-        message_list,
-        client_list,
-        nick=None,
-        self_addr=None,
-        poll_interval=0.05
-    ):
+            self,
+            listener,
+            message_list,
+            client_list,
+            nick=None,
+            self_ip=None,
+            poll_interval=0.05 ):
         self.listener = listener
         self.msg_list = message_list
         self.client_list = client_list
         self.nick = nick
-        self.self_addr = self_addr
+        self.self_ip = self_ip 
         self.poll_interval = poll_interval
 
-        if self_addr is None or nick is None:
-            raise ValueError("self_addr and nick required")
+        if self_ip is None or nick is None:
+            raise ValueError("self_ip and nick required")
 
         # this is a boolean for whether we are in a peer group or just open for one
         self.connected = True
-
-        # convert own address IP into int
-        self.self_ip_int = _ip_to_int(self.self_addr[0])
 
         # socket from listener for peer discovery (couldn't manage it with separate)
         self.sock = self.listener.sock

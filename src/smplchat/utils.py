@@ -1,4 +1,5 @@
 """ smplchat.utils - collection of small helper function """
+import socket
 from random import getrandbits
 from time import time
 from sys import stderr
@@ -16,3 +17,15 @@ def dprint(*args, **kwargs):
     """ dprint - just as print, but prints to stderr only if DEBUG is defined """
     if DEBUG:
         print(*args, **kwargs, file=stderr)
+
+def get_my_ip():
+    """
+    Find my IP address
+    :return:
+    Copied from: https://stackoverflow.com/questions/207234/list-of-ip-addresses-hostnames-from-local-network-in-python
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip

@@ -6,11 +6,11 @@ from smplchat import settings
 
 class Listener:
 
-    def __init__(self, port: int | None = None):
+    def __init__(self):
         self.__msg_queue: list[tuple[bytes, tuple[str, int]]] = []
         self.__msg_lock: Lock = threading.Lock()
 
-        self.__port = port or settings.PORT
+        self.__port = settings.PORT
         self._sock = socket.socket(type=socket.SOCK_DGRAM)
         address = ("", self.__port)
         self._sock.bind(address)
