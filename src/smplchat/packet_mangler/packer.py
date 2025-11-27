@@ -16,7 +16,6 @@ from smplchat.message import (
 
 def packer(m: Message):
     """ packer - packs message to binary data for sending """
-    # pylint: too-many-function-args
 
     if isinstance(m, ChatRelayMessage):
         sender_nick = m.sender_nick.encode()

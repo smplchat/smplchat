@@ -1,6 +1,5 @@
 """ smplchat.settings - Contains global settings like default ports """
 from os import getenv
-from sys import stderr
 
 try:
     DEBUG
