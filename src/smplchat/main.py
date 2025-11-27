@@ -55,6 +55,8 @@ def main():
                 break
             elif intxt.startswith("/nick"):
                 nick = intxt.split()[1]
+            elif intxt.startswith("/help"):
+                initial_messages(msg_list)
             elif intxt.startswith("/join"):
                 msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
                 remote_ip = intxt.split()[1]
