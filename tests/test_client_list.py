@@ -1,0 +1,49 @@
+import unittest
+
+from time import time
+from random import sample
+from smplchat.settings import NODE_TIMEOUT
+from smplchat.client_list import ClientList
+
+class TestClientList(unittest.TestCase):
+    def test_init(self):
+        self.cl = ClientList(0)
+
+    def test_add(self):
+        self.cl = ClientList(0)
+        self.assertEqual(self.cl.get(), [])
+        self.cl.add(1)
+        self.assertEqual(self.cl.get(), [1])
+        self.cl.add(2)
+        self.assertEqual(self.cl.get(), [1, 2])
+        self.cl.add(3)
+        self.assertEqual(self.cl.get(3), [1, 2, 3])
+
+    def test_add_list(self):
+        self.cl = ClientList(0)
+        self.cl.add_list([1, 2])
+        self.assertEqual(self.cl.get(), [1, 2])
+        self.cl.add_list([3, 4])
+        self.assertEqual(self.cl.get(4), [1, 2, 3, 4])
+
+    def test_remove(self):
+        self.cl = ClientList(0)
+        self.cl.add_list([1, 2, 3])
+        self.assertEqual(self.cl.get(3), [1, 2, 3])
+        self.cl.remove(2)
+        self.assertEqual(self.cl.get(), [1, 3])
+        self.cl.remove(4)
+        self.assertEqual(self.cl.get(), [1, 3])
+
+    def test_clear(self):
+        self.cl = ClientList(0)
+        self.cl.add_list([1, 2, 3])
+        self.assertEqual(self.cl.get(3), [1, 2, 3])
+        self.cl.clear()
+        self.assertEqual(self.cl.get(), [])
+
+    def test_get(self):
+        self.cl = ClientList(0)
+        self.assertEqual(self.cl.get(), [])
+        self.cl.add_list([1, 2])
+        self.assertEqual(self.cl.get(), [1, 2])
