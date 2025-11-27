@@ -4,7 +4,7 @@ import struct
 from random import getrandbits
 from time import time
 from sys import stderr
-from .settings import DEBUG
+from smplchat.settings import DEBUG
 
 def generate_uid():
     """ Generates 64bit uid where half/half is time/random """
@@ -23,7 +23,7 @@ def get_my_ip():
     """
     Find my IP address
     :return:
-    Copied from: https://stackoverflow.com/questions/207234/list-of-ip-addresses-hostnames-from-local-network-in-python
+    Copied from Stackoverflow: https://tinyurl.com/27txex9w
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -32,7 +32,9 @@ def get_my_ip():
     return ip
 
 def ip_to_int(data: bytes):
+    """ Changes IP-address to int """
     return struct.unpack("=L", data)[0]
 
 def int_to_ip(n: int):
+    """ Changes int to IP-address """
     return struct.pack("=L", n)
