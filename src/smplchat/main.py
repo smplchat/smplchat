@@ -72,27 +72,39 @@ def main():
             intxt = tui.update(nick)
             if intxt is None:
                 pass
+
             elif intxt.startswith("/quit"):
                 msg = new_message(msg_type=MessageType.LEAVE_RELAY, nick=nick,
                         ip=self_ip, msg_list=msg_list)
-                #    sender.send(msg)
-                #    msg_list.add(msg)
+                sender.send(msg, client_list.get())
                 tui.stop()
                 break
+
             elif intxt.startswith("/nick"):
-                nick = intxt.split()[1]
+                new_nick = intxt.split()[1]
+                msg = new_message(msg_type=MessageType.CHAT_RELAY, nick="system",
+                        text=f"*** <{nick}> is now known as <{new_nick}>",
+                        ip=self_ip, msg_list=msg_list)
+                nick = new_nick
+                msg_list.add(msg)
+                sender.send(msg, client_list.get())
+
             elif intxt.startswith("/help"):
                 initial_messages(msg_list)
+
             elif intxt.startswith("/join"):
                 msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
-                #try:
-                remote_ip = ip_to_int(socket.inet_aton(intxt.split()[1]))
-                msg_list.sys_message(f"*** Join request sent to {socket.inet_ntoa(int_to_ip(remote_ip))}")
-                sender.send(msg, [remote_ip])
-                #except:
-                #    msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
-            else: # only text to send
+                remote_ip = None
+                try:
+                    remote_ip = ip_to_int(socket.inet_aton(intxt.split()[1]))
+                except OSError:
+                    msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
+                if remote_ip:
+                    msg_list.sys_message("*** Join request sent to "
+                            f"{socket.inet_ntoa(int_to_ip(remote_ip))}")
+                    sender.send(msg, [remote_ip])
 
+            else: # only text to send
                 msg = new_message(msg_type=MessageType.CHAT_RELAY, nick=nick,
                         text=intxt, ip=self_ip, msg_list=msg_list)
                 msg_list.add(msg)
