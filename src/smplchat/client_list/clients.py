@@ -16,7 +16,8 @@ class ClientList:
 
     def add_list(self, ip_addresses: list[int]):
         """ Adds list of ip addresses to the list """
-        (self.add(x) for x in ip_addresses) # pylint: disable=["expression-not-assigned"]
+        for x in ip_addresses:
+            self.add(x)
 
     def remove(self, ip_addr):
         """ Just removes ip from the list. For example on leave """
@@ -38,4 +39,4 @@ class ClientList:
         peers = list(self.__iplist.keys())
         if len(peers) <= n:
             return peers
-        return [sample(peers, n)]
+        return sample(peers, n)
