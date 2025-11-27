@@ -16,7 +16,7 @@ from smplchat.message import (
 
 def packer(m: Message):
     """ packer - packs message to binary data for sending """
-    # pylint: disable-msg=too-many-return-statements, too-many-function-args
+    # pylint: too-many-function-args
 
     if isinstance(m, ChatRelayMessage):
         sender_nick = m.sender_nick.encode()
@@ -237,7 +237,6 @@ def unpack_old_reply_message(data: bytes):
 
 def unpacker(data: bytes):
     """ unpacker - unpacks messages from raw data """
-    # pylint: disable-msg=too-many-return-statements
 
     match unpack_from("=B", data)[0]:	# Unpacks message type
 
