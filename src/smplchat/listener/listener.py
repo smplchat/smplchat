@@ -1,3 +1,4 @@
+""" listener.py - smplchat.listener """
 import socket
 import threading
 import struct
@@ -6,7 +7,7 @@ from threading import Lock
 from smplchat import settings
 
 class Listener:
-
+    """ Listener - a class for receiving UDP packets """
     def __init__(self):
         self.__msg_queue: list[tuple[bytes, tuple[str, int]]] = []
         self.__msg_lock: Lock = threading.Lock()
@@ -41,6 +42,7 @@ class Listener:
             self.__msg_queue.append((data, ip_addr))
 
     def get_messages(self) -> list[(bytes, int)]:
+        """ Method for retrieving messages from msg_queue """
         ret = []
         with self.__msg_lock:
             ret = self.__msg_queue
@@ -48,6 +50,7 @@ class Listener:
         return ret
 
     def stop(self):
+        """ Method for stopping the thread and closing the socket """
         self.__stop = True
         self.__thread.join()
         try:
