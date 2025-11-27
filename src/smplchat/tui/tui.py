@@ -20,7 +20,7 @@ class UserInterface:
         signal(SIGINT, handler)
 
         # fetch the list of current messages
-        self.messages = messages.get()
+        self.messages = messages
         self.username = username
 
         # curses window objects
@@ -171,9 +171,12 @@ class UserInterface:
 
     def _render_messages(self) -> None:
         """ renders messages to message-window"""
+        if not self.messages.updated:
+            return None
+        self.messages.updated = False
         self._windows.msg_win.erase()
         lines = []
-        for entry in self.messages:
+        for entry in self.messages.get():
             time_str = ( datetime.datetime
                     .fromtimestamp(get_time_from_uid(entry.uid))
                     .strftime("%H:%M:%S") )

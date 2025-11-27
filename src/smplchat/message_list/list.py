@@ -143,6 +143,7 @@ class MessageList:
             seen = 1,
             nick = "system",
             message = text))
+        self.updated = True
         return uid
 
     def find(self, uid: int):
