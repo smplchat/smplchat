@@ -2,7 +2,11 @@
 from os import getenv
 from sys import stderr
 
-DEBUG = getenv("DEBUG")
+try:
+    DEBUG
+except NameError:
+    DEBUG = getenv("DEBUG")
+
 PORT = 62733
 NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
 
