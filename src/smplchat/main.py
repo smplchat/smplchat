@@ -40,7 +40,7 @@ def main():
                 if msg.msg_type < 128: #relay message
                     client_list.add(remote_ip) # keep keep-alive-counter happy
                     seen = msg_list.is_seen(msg.uniq_msg_id)
-                    if seen and seen < 2: # resend first 2 times
+                    if not seen or seen < 2: # resend first 2 times
                         dispatcher.send(msg, client_list.get(exclude=remote_ip))
                         msg_list.add(msg)
                 if msg.msg_type == 128: #join request
