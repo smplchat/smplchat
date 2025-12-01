@@ -6,3 +6,4 @@ if "DEBUG" not in globals():
 
 PORT = 62733
 NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
+#KEEPALIVE_INTERVAL = 30 # keepalive's interval in seconds
