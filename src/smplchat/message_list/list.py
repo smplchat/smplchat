@@ -1,5 +1,8 @@
 """ list - Provides message list and methods to manipulate it """
+from datetime import datetime, timedelta
 from dataclasses import dataclass
+from typing import TypeAlias, List
+
 from smplchat.message import (
     MessageType,
     Message,
@@ -9,11 +12,11 @@ from smplchat.message import (
     JoinReplyMessage,
     OldReplyMessage)
 from smplchat.utils import (
-    generate_uid,
-    dprint )
+    dprint, get_time_from_uid)
+
 
 @dataclass
-class MessageEntry:
+class FullMessageEntry:
     """ Entry in the message list
     
         Details:
@@ -29,10 +32,33 @@ class MessageEntry:
     nick: str
     message: str
 
+
+@dataclass
+class WaitingMessageEntry:
+    uid: int
+    fetch_count: int
+    last_tried: datetime
+
+
+@dataclass
+class GivenUpMessageEntry:
+    uid: int
+
+
+@dataclass
+class SystemMessageEntry:
+    message: str
+    timestamp: datetime
+
+
+MessageEntry: TypeAlias = FullMessageEntry | WaitingMessageEntry | GivenUpMessageEntry | SystemMessageEntry
+
+
 class MessageList:
     """ MessageList - The class for the list. """
+
     def __init__(self):
-        self.__messages = []
+        self.__messages: List[MessageEntry] = []
         self.updated = False
 
     def __update(self):
@@ -48,38 +74,34 @@ class MessageList:
             return False
         for rcv_uid in history:
             if self.find(rcv_uid) is None:
-                self.__messages.insert(pos, MessageEntry (
-                    uid = rcv_uid,
-                    mtype = -1,
-                    seen = 0,
-                    nick = "system",
-                    message = f"<{rcv_uid}> message pending" ) )
+                self.__messages.insert(pos, WaitingMessageEntry(rcv_uid, 0, datetime.now()))
                 pos += 1
                 new_entries = True
         return new_entries
-
 
     def __update_message(self, uid, mtype, nick, message):
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
-            seen = entry.seen
-            if seen > 0:	# Already seen only updating seen counter
-                self.__messages[pos] = MessageEntry (
-                    uid = entry.uid,
-                    mtype = mtype,
-                    seen = seen + 1,
-                    nick = entry.nick,
-                    message = entry.message )
+
+            if isinstance(entry, (WaitingMessageEntry, GivenUpMessageEntry)):
+                self.__messages[pos] = self.__messages[pos] = FullMessageEntry(
+                    uid=uid,
+                    mtype=mtype,
+                    seen=1,
+                    nick=nick,
+                    message=message)
+                self.updated = True
                 return True
-            self.__messages[pos] = MessageEntry (
-                    uid = uid,
-                    mtype = mtype,
-                    seen = 1,
-                    nick = nick,
-                    message = message )
-            self.updated = True
-            return True
+            elif isinstance(entry, FullMessageEntry):
+                seen = entry.seen
+                self.__messages[pos] = FullMessageEntry(
+                    uid=entry.uid,
+                    mtype=mtype,
+                    seen=seen + 1,
+                    nick=entry.nick,
+                    message=entry.message)
+                return True
         return False
 
     def __generate_message(self, msg_type, text):
@@ -96,11 +118,11 @@ class MessageList:
     def add(self, msg: Message):
         """ add - Adds message and its history to the list """
         if isinstance(msg, (ChatRelayMessage, JoinRelayMessage,
-                LeaveRelayMessage, OldReplyMessage)):
+                            LeaveRelayMessage, OldReplyMessage)):
             uid = msg.uniq_msg_id
             nick = msg.sender_nick
-            mtype = ( msg.old_msg_type if hasattr(msg, "old_msg_type")
-                    else msg.msg_type )
+            mtype = (msg.old_msg_type if hasattr(msg, "old_msg_type")
+                     else msg.msg_type)
             text = msg.msg_text if hasattr(msg, "msg_text") else ""
             message = self.__generate_message(mtype, text)
 
@@ -113,20 +135,19 @@ class MessageList:
                 dprint("Got reply without asking")
                 return False
 
-            self.__messages.append(MessageEntry (
-                uid = uid,
-                mtype = mtype,
-                seen = 1,
-                nick = nick,
-                message = message ))
+            self.__messages.append(FullMessageEntry(
+                uid=uid,
+                mtype=mtype,
+                seen=1,
+                nick=nick,
+                message=message))
             if hasattr(msg, "old_message_ids"):
                 self.__add_unseen_history(uid, msg.old_message_ids)
             self.updated = True
             return True
 
         if isinstance(msg, JoinReplyMessage):
-            uid = self.sys_message("*** Join request succesful")
-            self.__add_unseen_history(uid, msg.old_message_ids)
+            self.sys_message("*** Join request succesful")
             self.updated = True
             return True
 
@@ -136,30 +157,30 @@ class MessageList:
 
     def sys_message(self, text):
         """ Appends system message to the end of message list"""
-        uid = generate_uid()
-        self.__messages.append(MessageEntry (
-            uid = uid,
-            mtype = -2,
-            seen = 1,
-            nick = "system",
-            message = text))
+        self.__messages.append(SystemMessageEntry(message=text, timestamp=datetime.now()))
         self.updated = True
-        return uid
 
     def find(self, uid: int):
         """ find - finds if there is already message of uid
             returns position in the list or None
         """
         for i, entry in enumerate(self.__messages):
-            if entry.uid == uid:
+            if hasattr(entry, "uid") and entry.uid == uid:
                 return i
         return None
 
     def is_seen(self, uid: int):
         """ is_seen - Returns how many times uid is seen """
         for m in self.__messages:
-            if m.uid == uid:
-                return m.seen
+            if isinstance(m, FullMessageEntry):
+                if m.uid == uid:
+                    return m.seen
+            elif isinstance(m, WaitingMessageEntry):
+                if m.uid == uid:
+                    return 0
+            elif isinstance(m, GivenUpMessageEntry):
+                if m.uid == uid:
+                    return 0
         return None
 
     def get(self):
@@ -169,7 +190,53 @@ class MessageList:
 
     def latest_ids(self, limit=None):
         """Returns latest IDs and has a limit function."""
-        uid_list = [x.uid for x in self.__messages if x.mtype >= 0]
+        uid_list = [x.uid for x in self.__messages if isinstance(x, FullMessageEntry)]
         if limit is None or limit >= len(uid_list):
             return uid_list
         return uid_list[-limit:]
+
+    def get_waiting_message(self) -> int | None:
+        def __can_be_requested(item: tuple[int, MessageEntry]):
+            msg = item[1]
+            if not isinstance(msg, WaitingMessageEntry):
+                return False
+            return msg.last_tried < (datetime.now() - timedelta(seconds=1))
+
+        e = enumerate(self.__messages)
+        waiting_messages: list[tuple[int, WaitingMessageEntry]] = list(filter(__can_be_requested, e))
+        if not waiting_messages:
+            return None
+        last = waiting_messages[-1]
+        last_index = last[0]
+        last_msg = last[1]
+        if last_msg.fetch_count >= 4:
+            self.__messages[last_index] = GivenUpMessageEntry(last_msg.uid)
+        else:
+            self.__messages[last_index] = WaitingMessageEntry(uid=last_msg.uid, fetch_count=last_msg.fetch_count + 1,
+                                                              last_tried=datetime.now())
+        self.updated = True
+        return last_msg.uid
+
+    def get_textual_contents(self) -> list[str]:
+        def __message_to_string(msg: MessageEntry) -> str:
+            if isinstance(msg, FullMessageEntry):
+                time_str = (datetime
+                            .fromtimestamp(get_time_from_uid(msg.uid))
+                            .strftime("%H:%M:%S"))
+                return f"[{time_str}] {msg.nick}: {msg.message}"
+            if isinstance(msg, WaitingMessageEntry):
+                return "Message pending"
+            if isinstance(msg, GivenUpMessageEntry):
+                return "Failed to fetch message"
+            if isinstance(msg, SystemMessageEntry):
+                time_str = (msg.timestamp.strftime("%H:%M:%S"))
+                return f"[{time_str}] [System] {msg.message}"
+            return ""
+
+        return list(map(__message_to_string, self.__messages))
+
+    def get_by_uid(self, uid: int) -> FullMessageEntry | None:
+        for entry in self.__messages:
+            if isinstance(entry, FullMessageEntry) and entry.uid == uid:
+                return entry
+        return None

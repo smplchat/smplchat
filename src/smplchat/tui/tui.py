@@ -1,16 +1,15 @@
 """ tui.py - a simple user interface for smplchat """
 import curses
 import locale
-import datetime
 from signal import signal, SIGINT
 from types import SimpleNamespace
 
-from smplchat.utils import get_time_from_uid
+from smplchat.message_list import MessageList
 
 class UserInterface:
     """ class for capturing user inputs and rendering
         received messages """
-    def __init__(self, messages, username: str):
+    def __init__(self, messages:MessageList, username: str):
 
         # Add own handler for keyboard interrupt
         self.__quit_called = False
@@ -175,12 +174,7 @@ class UserInterface:
             return
         self.messages.updated = False
         self._windows.msg_win.erase()
-        lines = []
-        for entry in self.messages.get():
-            time_str = ( datetime.datetime
-                    .fromtimestamp(get_time_from_uid(entry.uid))
-                    .strftime("%H:%M:%S") )
-            lines.append(f"[{time_str}] {entry.nick}: {entry.message}")
+        lines = self.messages.get_textual_contents()
         msg_h, msg_w = self._windows.msg_win.getmaxyx()
         start = max(0, len(lines) - msg_h)
         shown = lines[start: start + msg_h]
