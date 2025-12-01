@@ -54,7 +54,7 @@ def packer(m: Message):
 
     if isinstance(m, KeepaliveRelayMessage):
         return pack(
-            "=BQL",
+            "=BQ4s",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
             m.sender_ip.packed)				# L - 4 bytes
