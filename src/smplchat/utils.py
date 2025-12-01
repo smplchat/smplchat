@@ -1,6 +1,7 @@
 """ smplchat.utils - collection of small helper function """
 import socket
 import struct
+from ipaddress import IPv4Address
 from random import getrandbits
 from time import time
 from sys import stderr
@@ -19,7 +20,7 @@ def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs, file=stderr)
 
-def get_my_ip():
+def get_my_ip() -> IPv4Address:
     """
     Find my IP address
     :return:
@@ -27,14 +28,6 @@ def get_my_ip():
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
-    ip = s.getsockname()[0]
+    ip = IPv4Address(s.getsockname()[0])
     s.close()
     return ip
-
-def ip_to_int(data: bytes):
-    """ Changes IP-address to int """
-    return struct.unpack("=L", data)[0]
-
-def int_to_ip(n: int):
-    """ Changes int to IP-address """
-    return struct.pack("=L", n)

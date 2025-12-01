@@ -27,7 +27,7 @@ def packer(m: Message):
                 f"{len(msg_text)}s",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
-            m.sender_ip,				# L - 4 bytes
+            m.sender_ip.packed,				# L - 4 bytes
             len(m.old_message_ids),			# L - 4 bytes
             len(sender_nick),				# L - 4 bytes
             len(msg_text),				# L - 4 bytes
@@ -44,7 +44,7 @@ def packer(m: Message):
                 f"{len(sender_nick)}s",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
-            m.sender_ip,				# L - 4 bytes
+            m.sender_ip.packed,				# L - 4 bytes
             len(m.old_message_ids),			# L - 4 bytes
             len(sender_nick),				# L - 4 bytes
 
@@ -56,7 +56,7 @@ def packer(m: Message):
             "=BQL",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
-            m.sender_ip)				# L - 4 bytes
+            m.sender_ip.packed)				# L - 4 bytes
 
     if isinstance(m, JoinRequestMessage):
         sender_nick = m.sender_nick.encode()
@@ -79,7 +79,7 @@ def packer(m: Message):
             len(m.ip_addresses),			# L - 4 bytes
 
             *m.old_message_ids,				# ?Q - ? x 8 bytes
-            *m.ip_addresses)				# ?L - ? x 4 bytes
+            *[ip.packed for ip in m.ip_addresses]	# ?L - ? x 4 bytes
 
     if isinstance(m, OldRequestMessage):
         return pack(
@@ -117,7 +117,7 @@ def unpack_chat_relay_message(data: bytes):
         old_msgs_length,	# L - 4 bytes
         nick_length,		# L - 4 bytes
         msg_length) = (		# L - 4 bytes
-            unpack_from("=BQLLLL", data) )
+            unpack_from("=BQ4sLLL", data) )
     offset = 25
 
     old_message_ids = list( unpack_from(
@@ -134,7 +134,7 @@ def unpack_chat_relay_message(data: bytes):
     return ChatRelayMessage(
         msg_type = msg_type,
         uniq_msg_id = uniq_msg_id,
-        sender_ip = sender_ip,
+        sender_ip = IPv4Address(sender_ip),
         old_message_ids = old_message_ids,
         sender_nick = sender_nick,
         msg_text = msg_text)
@@ -166,7 +166,7 @@ def unpack_joinleave_relay_message(data: bytes):
     return ret_type(
         msg_type = msg_type,
         uniq_msg_id = uniq_msg_id,
-        sender_ip = sender_ip,
+        sender_ip = IPv4Address(sender_ip),
         old_message_ids = old_message_ids,
         sender_nick = sender_nick)
 
@@ -200,13 +200,13 @@ def unpack_join_reply_message(data: bytes):
             f"={old_msgs_length}Q", data, offset=offset) )
     offset += 8 * old_msgs_length
 
-    ip_addresses = list( unpack_from(
-            f"={ip_addrs_length}L", data, offset=offset) )
+    ip_addresses = list( map(IPv4Address, unpack_from(
+            f"={ip_addrs_length}L", data, offset=offset)) )
 
     return JoinReplyMessage(
         msg_type = msg_type,
         old_message_ids = old_message_ids,
-        ip_addresses = ip_addresses)
+        ip_addresses = IPv4Address(ip_addresses))
 
 
 def unpack_old_reply_message(data: bytes):
@@ -253,7 +253,7 @@ def unpacker(data: bytes):
             return KeepaliveRelayMessage(
                 msg_type = msg_type,
                 uniq_msg_id = uniq_msg_id,
-                sender_ip = sender_ip)
+                sender_ip = IPv4Address(sender_ip))
 
         case MessageType.JOIN_REQUEST:
             return unpack_join_request_message(data)

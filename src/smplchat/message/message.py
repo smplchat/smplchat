@@ -1,6 +1,7 @@
 """ smplchat.message - message dataclasses are defined here """
 from dataclasses import dataclass
 from enum import IntEnum
+from ipaddress import IPv4Address
 
 class MessageType(IntEnum):
     """ Different types of allowed message types and corresponding int """
@@ -26,7 +27,7 @@ class ChatRelayMessage(RelayMessage):
     """ chat relay message - actual messages send by users """
     msg_type: int
     uniq_msg_id: int
-    sender_ip: int
+    sender_ip: IPv4Address
     old_message_ids: list[int]
     sender_nick: str
     msg_text: str
@@ -36,7 +37,7 @@ class JoinRelayMessage(RelayMessage):
     """ join relay message - the message formed by client that handles join request """
     msg_type: int
     uniq_msg_id: int
-    sender_ip: int
+    sender_ip: IPv4Address
     old_message_ids: list[int]
     sender_nick: str
 
@@ -45,7 +46,7 @@ class LeaveRelayMessage(RelayMessage):
     """ leave relay message - send by client leaving the chat """
     msg_type: int
     uniq_msg_id: int
-    sender_ip: int
+    sender_ip: IPv4Address
     old_message_ids: list[int]
     sender_nick: str
 
@@ -56,7 +57,7 @@ class KeepaliveRelayMessage(Message):
     """
     msg_type: int
     uniq_msg_id: int
-    sender_ip: int
+    sender_ip: IPv4Address
 
 @dataclass
 class JoinRequestMessage(Message):
@@ -70,7 +71,7 @@ class JoinReplyMessage(Message):
     """ join reply message - informs newly joined client about history and ip:s"""
     msg_type: int
     old_message_ids: list[int]
-    ip_addresses: list[int]
+    ip_addresses: list[IPv4Address]
 
 @dataclass
 class OldRequestMessage(Message):

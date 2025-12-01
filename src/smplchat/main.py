@@ -1,4 +1,5 @@
 """ main.py - smplchat """
+from ipaddress import IPv4Address
 import socket
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
@@ -7,16 +8,16 @@ from smplchat.tui import UserInterface
 from smplchat.message import new_message, MessageType
 from smplchat.client_list import ClientList
 from smplchat.packet_mangler import unpacker
-from smplchat.utils import get_my_ip, dprint, ip_to_int, int_to_ip
+from smplchat.utils import get_my_ip, dprint
 
 def main():
     """ main - the entry point to the application """
 
     print("Welcome to smplchat!\n")
 
-    self_ip = ip_to_int(socket.inet_aton(get_my_ip()))
+    self_ip = get_my_ip()
 
-    dprint(f"INFO: Got ip-address {socket.inet_ntoa(int_to_ip(self_ip))}")
+    dprint(f"INFO: Got ip-address {str(self_ip)}")
 
     # prompt nickname
     nick = input("Enter nickname for chat: ").strip() or "anon"
@@ -29,7 +30,7 @@ def main():
     dispatcher = Dispatcher()
     tui = UserInterface(msg_list, nick)
 
-    msg_list.sys_message( f"*** Your IP: {socket.inet_ntoa(int_to_ip(self_ip))}" )
+    msg_list.sys_message( f"*** Your IP: {str(self_ip)}" )
 
     try:
         while True:
@@ -44,7 +45,7 @@ def main():
                 if msg.msg_type == 128: #join request
                     msg_list.sys_message(
                             f"*** Join request from <{msg.sender_nick}>, "
-                            f"IP: {socket.inet_ntoa(int_to_ip(remote_ip))}")
+                            f"IP: {str(remote_ip)}")
                     client_list.add(remote_ip)
                     # Send join reply
                     out_msg = new_message(msg_type=MessageType.JOIN_REPLY,
@@ -57,7 +58,7 @@ def main():
                     dispatcher.send(out_msg, client_list.get())
                 if msg.msg_type == 129: #join reply
                     msg_list.sys_message(
-                            f"*** Join accepted {socket.inet_ntoa(int_to_ip(remote_ip))} ")
+                            f"*** Join accepted {str(remote_ip)} ")
                     client_list.add(remote_ip)
                     # TODO: Do the old messages # pylint: disable=["fixme"]
                     client_list.add_list(msg.ip_addresses)
@@ -91,7 +92,7 @@ def main():
                 msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
                 remote_ip = None
                 try:
-                    remote_ip = ip_to_int(socket.inet_aton(intxt.split()[1]))
+                    remote_ip = IPv4Address(intxt.split()[1])
                 except OSError:
                     msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
                 if remote_ip:

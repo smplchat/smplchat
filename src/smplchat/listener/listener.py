@@ -2,6 +2,7 @@
 import socket
 import threading
 import struct
+from ipaddress import IPv4Address
 from threading import Lock
 
 from smplchat import settings
@@ -9,7 +10,7 @@ from smplchat import settings
 class Listener:
     """ Listener - a class for receiving UDP packets """
     def __init__(self):
-        self.__msg_queue: list[tuple[bytes, tuple[str, int]]] = []
+        self.__msg_queue: list[tuple[bytes, tuple[str, IPv4Address]]] = []
         self.__msg_lock: Lock = threading.Lock()
 
         self.__port = settings.PORT
@@ -31,17 +32,15 @@ class Listener:
         while not self.__stop:
             try:
                 data, addr = self._sock.recvfrom(10000)
-                self.__append_msg(
-                    data,
-                    int(struct.unpack("=L", socket.inet_aton(addr[0]))[0]) )
+                self.__append_msg(data, IPv4Address(addr[0]))
             except BlockingIOError as _:
                 pass
 
-    def __append_msg(self, data: bytes, ip_addr: int):
+    def __append_msg(self, data: bytes, ip_addr: IPv4Address):
         with self.__msg_lock:
             self.__msg_queue.append((data, ip_addr))
 
-    def get_messages(self) -> list[(bytes, int)]:
+    def get_messages(self) -> list[(bytes, IPv4Address)]:
         """ Method for retrieving messages from msg_queue """
         ret = []
         with self.__msg_lock:
