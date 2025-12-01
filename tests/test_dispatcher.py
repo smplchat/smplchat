@@ -1,11 +1,11 @@
 import socket
 import unittest
+from ipaddress import IPv4Address
 from unittest.mock import patch, MagicMock, call
 
 from smplchat.dispatcher import Dispatcher
 from smplchat.message import ChatRelayMessage, MessageType
 from smplchat.settings import PORT
-from smplchat.utils import ip_to_int
 
 class TestDispatcher(unittest.TestCase):
 
@@ -26,8 +26,8 @@ class TestDispatcher(unittest.TestCase):
         )
 
         ips = [
-            ip_to_int(socket.inet_aton("127.0.0.1")),
-            ip_to_int(socket.inet_aton("8.8.8.8")),
+            IPv4Address("127.0.0.1"),
+            IPv4Address("8.8.8.8"),
         ]
 
         dispatcher.send(msg, ips)

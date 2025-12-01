@@ -1,7 +1,6 @@
 """ listener.py - smplchat.listener """
 import socket
 import threading
-import struct
 from ipaddress import IPv4Address
 from threading import Lock
 
