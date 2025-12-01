@@ -93,7 +93,7 @@ class MessageList:
                     message=message)
                 self.updated = True
                 return True
-            elif isinstance(entry, FullMessageEntry):
+            if isinstance(entry, FullMessageEntry):
                 seen = entry.seen
                 self.__messages[pos] = FullMessageEntry(
                     uid=entry.uid,

@@ -39,7 +39,7 @@ def main():
                 msg = unpacker(rx_msg)
                 if msg.msg_type < 128: #relay message
                     client_list.add(remote_ip) # keep keep-alive-counter happy
-                    if not msg_list.is_seen(msg.uniq_msg_id):
+                    if msg_list.is_seen(msg.uniq_msg_id) < 2: # first 2 times
                         dispatcher.send(msg, client_list.get(exclude=remote_ip))
                         msg_list.add(msg)
                 if msg.msg_type == 128: #join request
@@ -102,7 +102,7 @@ def main():
                 try:
                     remote_ip = IPv4Address(intxt.split()[1])
                 except IndexError:
-                    msg_list.sys_message(f"*** Join needs address")
+                    msg_list.sys_message("*** Join needs address")
                 except AddressValueError:
                     msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
                 if remote_ip:
