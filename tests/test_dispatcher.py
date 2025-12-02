@@ -1,4 +1,3 @@
-import socket
 import unittest
 from ipaddress import IPv4Address
 from unittest.mock import patch, MagicMock, call
