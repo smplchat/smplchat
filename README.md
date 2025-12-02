@@ -54,7 +54,7 @@ Then in however many terminals with this command we start a container and also s
 ```
 docker run -it --rm smplchat
 ```
-All the containers get their own IP that you can use for the /join command.
+All the containers get their own IP that you can use for the /join command. Use flag " -e DEBUG=1" before smplchat for debug mode.
 
 You can run the build command again for any code changes, but if you want to remove the image, run:
 ```

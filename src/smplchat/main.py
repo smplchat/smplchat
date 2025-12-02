@@ -1,5 +1,6 @@
 """ main.py - smplchat """
 from ipaddress import IPv4Address, AddressValueError
+from time import time
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
@@ -8,6 +9,7 @@ from smplchat.message import new_message, MessageType
 from smplchat.client_list import ClientList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
+from smplchat.settings import KEEPALIVE_INTERVAL
 
 def main():
     """ main - the entry point to the application """
@@ -28,6 +30,7 @@ def main():
     initial_messages(msg_list) # adds some helpful messages to the list
     dispatcher = Dispatcher()
     tui = UserInterface(msg_list, nick)
+    last_keepalive = time()
 
     msg_list.sys_message( f"*** Your IP: {str(self_ip)}" )
 
@@ -39,6 +42,8 @@ def main():
                 msg = unpacker(rx_msg)
                 if msg.msg_type < 128: #relay message
                     client_list.add(remote_ip) # keep keep-alive-counter happy
+                    if msg.msg_type == MessageType.KEEPALIVE_RELAY:
+                        continue
                     seen = msg_list.is_seen(msg.uniq_msg_id)
                     if not seen or seen < 2: # resend first 2 times
                         dispatcher.send(msg, client_list.get(exclude=remote_ip))
@@ -121,6 +126,17 @@ def main():
             if waiting_message is not None:
                 msg = new_message(MessageType.OLD_REQUEST, uid=waiting_message)
                 dispatcher.send(msg,client_list.get(1))
+
+            # keepalive
+            if time() - last_keepalive >= KEEPALIVE_INTERVAL:
+                peers = client_list.get()
+                if peers:
+                    ka_msg = new_message(
+                        msg_type=MessageType.KEEPALIVE_RELAY,
+                        ip=self_ip,
+                    )
+                    dispatcher.send(ka_msg, peers)
+                last_keepalive = time()
     finally:
         # exit cleanup
         listener.stop()

@@ -5,6 +5,7 @@ from .message import (
     ChatRelayMessage,
     JoinRelayMessage,
     LeaveRelayMessage,
+    KeepaliveRelayMessage,
     JoinRequestMessage,
     JoinReplyMessage,
     OldRequestMessage,
@@ -52,6 +53,13 @@ def new_message(msg_type: MessageType, **kwargs):
                     sender_ip = kwargs["ip"],
                     old_message_ids = kwargs["msg_list"].latest_ids(limit=50),
                     sender_nick = kwargs["nick"])
+
+            case MessageType.KEEPALIVE_RELAY:
+                return KeepaliveRelayMessage(
+                    msg_type=MessageType.KEEPALIVE_RELAY,
+                    uniq_msg_id=uid,
+                    sender_ip=kwargs["ip"],
+                )
 
             case MessageType.JOIN_REQUEST:
                 return JoinRequestMessage(
