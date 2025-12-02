@@ -41,40 +41,47 @@ def main():
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
                 if msg.msg_type < 128: #relay message
-                    client_list.add(remote_ip) # keep keep-alive-counter happy
-                    if msg.msg_type == MessageType.KEEPALIVE_RELAY:
-                        continue
+                    client_list.add(remote_ip) # relayer is alive
                     seen = msg_list.is_seen(msg.uniq_msg_id)
                     if not seen or seen < 2: # resend first 2 times
-                        dispatcher.send(msg, client_list.get(exclude=remote_ip))
-                        msg_list.add(msg)
-                if msg.msg_type == 128: #join request
+                        # orginal sender is alive so add to the list
+                        client_list.add(msg.sender_ip)
+                        dispatcher.send(
+                                msg, client_list.get(exclude=remote_ip))
+                        if msg.msg_type != MessageType.KEEPALIVE_RELAY:
+                            msg_list.add(msg)
+
+                elif msg.msg_type == MessageType.JOIN_REQUEST:
                     msg_list.sys_message(
                             f"*** Join request from <{msg.sender_nick}>, "
                             f"IP: {str(remote_ip)}")
                     client_list.add(remote_ip)
                     # Send join reply
                     out_msg = new_message(msg_type=MessageType.JOIN_REPLY,
-                            ip=self_ip, msg_list=msg_list, client_list=client_list)
+                            ip=self_ip, msg_list=msg_list,
+                            client_list=client_list)
                     dispatcher.send(out_msg, [remote_ip])
                     # Send join relay message
                     out_msg = new_message(msg_type=MessageType.JOIN_RELAY,
                             nick=msg.sender_nick, ip=remote_ip,
                             msg_list=msg_list )
                     dispatcher.send(out_msg, client_list.get())
-                if msg.msg_type == 129: #join reply
+
+                elif msg.msg_type == MessageType.JOIN_REPLY:
                     msg_list.sys_message(
                             f"*** Join accepted {str(remote_ip)} ")
                     client_list.add(remote_ip)
-                    # TODO: Do the old messages # pylint: disable=["fixme"]
                     client_list.add_list(msg.ip_addresses)
-                if msg.msg_type == MessageType.OLD_REPLY:
+
+                elif msg.msg_type == MessageType.OLD_REPLY:
                     msg_list.add(msg)
-                if msg.msg_type == MessageType.OLD_REQUEST:
+
+                elif msg.msg_type == MessageType.OLD_REQUEST:
                     found = msg_list.get_by_uid(msg.uniq_msg_id)
                     if found is not None:
-                        msg = new_message(MessageType.OLD_REPLY, old_type=found.mtype, uid=msg.uniq_msg_id,
-                                          nick=found.nick, text=found.message)
+                        msg = new_message(MessageType.OLD_REPLY,
+                                old_type=found.mtype, uid=msg.uniq_msg_id,
+                                nick=found.nick, text=found.message)
                         dispatcher.send(msg, [remote_ip])
             client_list.update()
 
@@ -92,9 +99,10 @@ def main():
 
             elif intxt.startswith("/nick"):
                 new_nick = intxt.split()[1]
-                msg = new_message(msg_type=MessageType.CHAT_RELAY, nick="system",
+                msg = new_message(
+                        msg_type=MessageType.CHAT_RELAY, nick="system",
                         text=f"*** <{nick}> is now known as <{new_nick}>",
-                        ip=self_ip, msg_list=msg_list)
+                        ip=self_ip, msg_list=msg_list )
                 nick = new_nick
                 msg_list.add(msg)
                 dispatcher.send(msg, client_list.get())
@@ -110,9 +118,11 @@ def main():
                 except IndexError:
                     msg_list.sys_message("*** Join needs address")
                 except AddressValueError:
-                    msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
+                    msg_list.sys_message(
+                            f"*** Malformed address {intxt.split()[1]}")
                 if remote_ip:
-                    msg_list.sys_message(f"*** Join request sent to {str(remote_ip)}")
+                    msg_list.sys_message(
+                            f"*** Join request sent to {str(remote_ip)}")
                     dispatcher.send(msg, [remote_ip])
 
             else: # only text to send
