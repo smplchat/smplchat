@@ -6,10 +6,10 @@ if "DEBUG" not in globals():
     DEBUG = getenv("DEBUG")
 
 if "PORT" not in globals():
-    PORT = 62733
     try:
-        PORT = int(getenv("SMPLCHAT_PORT"))
+        PORT = int(getenv("SMPLCHAT_PORT") or 62733)
     except ValueError:
+        PORT = 62733
         print("Ignoring invalid SMPLCHAT_PORT enviromental variable",
                 file=stderr)
 
