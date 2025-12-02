@@ -9,5 +9,6 @@ from .message import (
     JoinRequestMessage,
     JoinReplyMessage,
     OldRequestMessage,
-    OldReplyMessage)
+    OldReplyMessage,
+    is_relay_message)
 from .message_gen import new_message

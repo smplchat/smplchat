@@ -87,3 +87,11 @@ class OldReplyMessage(Message):
     uniq_msg_id: int
     sender_nick: str
     msg_text: str
+
+def is_relay_message(msg: Message):
+    """ helper to figure out if message is relay type """
+    return msg.msg_type in (
+            MessageType.CHAT_RELAY,
+            MessageType.JOIN_RELAY,
+            MessageType.LEAVE_RELAY,
+            MessageType.KEEPALIVE_RELAY)

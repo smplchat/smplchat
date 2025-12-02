@@ -5,7 +5,7 @@ from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
 from smplchat.tui import UserInterface
-from smplchat.message import new_message, MessageType
+from smplchat.message import new_message, MessageType, is_relay_message
 from smplchat.client_list import ClientList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
@@ -40,7 +40,7 @@ def main():
             # Process input form listener
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
-                if msg.msg_type < 128: #relay message
+                if is_relay_message(msg):
                     client_list.add(remote_ip) # relayer is alive
                     seen = msg_list.is_seen(msg.uniq_msg_id)
                     if not seen or seen < 2: # resend first 2 times
