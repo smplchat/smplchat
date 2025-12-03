@@ -108,6 +108,12 @@ class MessageList:
                     nick=entry.nick,
                     message=entry.message)
                 return True
+            if isinstance(entry, KeepaliveMessageEntry):
+                seen = entry.seen
+                self.__messages[pos] = KeepaliveMessageEntry(
+                    uid=entry.uid,
+                    seen=seen + 1)
+                return True
         return False
 
     def __generate_message(self, msg_type, text):
@@ -227,8 +233,10 @@ class MessageList:
         if last_msg.fetch_count >= 4:
             self.__messages[last_index] = GivenUpMessageEntry(last_msg.uid)
         else:
-            self.__messages[last_index] = WaitingMessageEntry(uid=last_msg.uid, fetch_count=last_msg.fetch_count + 1,
-                                                              last_tried=datetime.now())
+            self.__messages[last_index] = WaitingMessageEntry(
+                    uid=last_msg.uid,
+                    fetch_count=last_msg.fetch_count + 1,
+                    last_tried=datetime.now() )
         self.updated = True
         return last_msg.uid
 
