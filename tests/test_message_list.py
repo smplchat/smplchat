@@ -13,8 +13,7 @@ from smplchat.message import (
 from smplchat.message_list.list import (
     FullMessageEntry,
     WaitingMessageEntry,
-    SystemMessageEntry,
-    KeepaliveMessageEntry)
+    SystemMessageEntry)
 
 
 class TestMessageList(unittest.TestCase):
@@ -227,14 +226,3 @@ class TestMessageList(unittest.TestCase):
         self.ml = MessageList()
         self.add_old_reply()
         self.assertEqual(self.ml.get(), [])
-
-    def test_keepalive_seen_duplicates(self):
-        self.ml = MessageList()
-        self.add_keepalive(uid=999)
-        self.add_keepalive(uid=999)
-        self.add_keepalive(uid=999)
-        keepalive_entries = [m for m in self.ml.get()
-                            if isinstance(m, KeepaliveMessageEntry)]
-        self.assertEqual(len(keepalive_entries), 1)
-        self.assertEqual(keepalive_entries[0].uid, 999)
-        self.assertEqual(keepalive_entries[0].seen, 3)

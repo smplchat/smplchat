@@ -10,8 +10,7 @@ from smplchat.message import (
     JoinRelayMessage,
     LeaveRelayMessage,
     JoinReplyMessage,
-    OldReplyMessage,
-    KeepaliveRelayMessage)
+    OldReplyMessage)
 from smplchat.utils import (
     dprint, get_time_from_uid)
 
@@ -41,12 +40,6 @@ class WaitingMessageEntry:
     last_tried: datetime
 
 @dataclass
-class KeepaliveMessageEntry:
-    uid: int
-    seen: int
-
-
-@dataclass
 class GivenUpMessageEntry:
     uid: int
 
@@ -57,7 +50,7 @@ class SystemMessageEntry:
     timestamp: datetime
 
 
-MessageEntry: TypeAlias = FullMessageEntry | WaitingMessageEntry | GivenUpMessageEntry | SystemMessageEntry | KeepaliveMessageEntry
+MessageEntry: TypeAlias = FullMessageEntry | WaitingMessageEntry | GivenUpMessageEntry | SystemMessageEntry
 
 
 class MessageList:
@@ -85,7 +78,7 @@ class MessageList:
         return new_entries
 
 
-    def __update_message(self, uid, mtype = None, nick = None, message = None):
+    def __update_message(self, uid, mtype, nick, message):
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
@@ -107,12 +100,6 @@ class MessageList:
                     seen=seen + 1,
                     nick=entry.nick,
                     message=entry.message)
-                return True
-            elif isinstance(entry, KeepaliveMessageEntry):
-                seen = entry.seen
-                self.__messages[pos] = KeepaliveMessageEntry(
-                    uid=entry.uid,
-                    seen=seen + 1)
                 return True
         return False
 
@@ -166,12 +153,6 @@ class MessageList:
             self.updated = True
             return True
 
-        if isinstance(msg, KeepaliveRelayMessage):
-            if not self.__update_message(msg.uniq_msg_id): # update if possible
-                self.__messages.append(KeepaliveMessageEntry(
-                        uid=msg.uniq_msg_id, seen=1 ))
-            return True
-
         dprint("ERROR: Message type is not supported by MessagList")
         dprint(msg)
         return False
@@ -193,7 +174,7 @@ class MessageList:
     def is_seen(self, uid: int):
         """ is_seen - Returns how many times uid is seen """
         for m in self.__messages:
-            if isinstance(m, (FullMessageEntry, KeepaliveMessageEntry)) and m.uid == uid:
+            if isinstance(m, FullMessageEntry) and m.uid == uid:
                 return m.seen
             if isinstance(m, (WaitingMessageEntry, GivenUpMessageEntry)) and m.uid == uid:
                 return 0

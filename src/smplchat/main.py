@@ -6,7 +6,7 @@ from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
 from smplchat.tui import UserInterface
 from smplchat.message import new_message, MessageType, is_relay_message
-from smplchat.client_list import ClientList
+from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
 from smplchat.settings import KEEPALIVE_INTERVAL
@@ -27,6 +27,7 @@ def main():
     client_list = ClientList(self_ip) # Initialize ip-list
     listener = Listener()
     msg_list = MessageList()
+    keepalive_list = KeepaliveList()
     initial_messages(msg_list) # adds some helpful messages to the list
     dispatcher = Dispatcher()
     tui = UserInterface(msg_list, nick)
@@ -40,7 +41,12 @@ def main():
             # Process input form listener
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
-                if is_relay_message(msg):
+                if msg.msg_type == MessageType.KEEPALIVE_RELAY:
+                    if keepalive_list.seen_count(msg.uniq_msg_id) < 2:
+                        dispatcher.send(msg, client_list.get(exclude=remote_ip))
+                    keepalive_list.add(msg.uniq_msg_id)
+
+                elif is_relay_message(msg):
                     client_list.add(remote_ip) # relayer is alive
                     seen = msg_list.is_seen(msg.uniq_msg_id)
                     if not seen or seen < 2: # resend first 2 times
@@ -147,6 +153,10 @@ def main():
                     )
                     dispatcher.send(ka_msg, peers)
                 last_keepalive = time()
+
+            # maintenance
+            keepalive_list.cleanup()
+            client_list.update()
     finally:
         # exit cleanup
         listener.stop()
