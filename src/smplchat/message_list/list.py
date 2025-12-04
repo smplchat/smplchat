@@ -169,7 +169,7 @@ class MessageList:
     def is_seen(self, uid: int):
         """ is_seen - Returns how many times uid is seen """
         for m in self.__messages:
-            if hasattr(m, "uid") and entry.uid == uid:
+            if hasattr(m, "uid") and m.uid == uid:
                 return m.seen or 0
         return 0
 
