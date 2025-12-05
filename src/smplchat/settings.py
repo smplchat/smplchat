@@ -23,3 +23,4 @@ if "SMPLCHAT_DROP_PERCENT" not in globals():
 
 NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
 KEEPALIVE_INTERVAL = 2 #int(NODE_TIMEOUT/2) # keepalive's interval in seconds
+LATEST_LIMIT = 50 # latest msgs spread with relays, note: JOIN_REPLY is multiplier of this

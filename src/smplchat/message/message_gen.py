@@ -1,5 +1,6 @@
 """ smplchat.message_gen - functions to generate messages """
 from smplchat.utils import generate_uid, dprint
+from smplchat.settings import LATEST_LIMIT
 from .message import (
     MessageType,
     ChatRelayMessage,
@@ -32,7 +33,7 @@ def new_message(msg_type: MessageType, **kwargs):
                 return ChatRelayMessage(
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
-                    old_message_ids = kwargs["msg_list"].latest_ids(limit=50),
+                    old_message_ids = kwargs["msg_list"].latest_ids(limit=LATEST_LIMIT),
                     sender_nick = kwargs["nick"],
                     msg_text = kwargs["text"])
 
@@ -40,14 +41,14 @@ def new_message(msg_type: MessageType, **kwargs):
                 return JoinRelayMessage(
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
-                    old_message_ids = kwargs["msg_list"].latest_ids(limit=50),
+                    old_message_ids = kwargs["msg_list"].latest_ids(limit=LATEST_LIMIT),
                     sender_nick = kwargs["nick"])
 
             case MessageType.LEAVE_RELAY:
                 return LeaveRelayMessage(
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
-                    old_message_ids = kwargs["msg_list"].latest_ids(limit=50),
+                    old_message_ids = kwargs["msg_list"].latest_ids(limit=LATEST_LIMIT),
                     sender_nick = kwargs["nick"])
 
             case MessageType.KEEPALIVE_RELAY:
@@ -63,7 +64,7 @@ def new_message(msg_type: MessageType, **kwargs):
 
             case MessageType.JOIN_REPLY:
                 return JoinReplyMessage(
-                    old_message_ids = kwargs["msg_list"].latest_ids(limit=100),
+                    old_message_ids = kwargs["msg_list"].latest_ids(limit=LATEST_LIMIT * 2),
                     ip_addresses = kwargs["client_list"].get() )
 
             case MessageType.OLD_REQUEST:
