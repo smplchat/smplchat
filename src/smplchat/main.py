@@ -29,9 +29,13 @@ def main():
     dprint(f"INFO: Got ip-address {str(self_ip)}")
 
     # prompt nickname
-    nick = input("Enter nickname for chat: ").strip() or "anon"
+    try:
+        nick = input("Enter nickname for chat: ").strip() or "anon"
+    except KeyboardInterrupt:
+        print("\nExited smplchat")
+        return
 
-    # core
+    # core initializations
     client_list = ClientList(self_ip) # Initialize ip-list
     listener = Listener()
     msg_list = MessageList()
@@ -43,6 +47,7 @@ def main():
 
     msg_list.sys_message( f"*** Your IP: {str(self_ip)}" )
 
+    # main event loop: processes messaging and tui input/output
     try:
         while True:
 
@@ -80,6 +85,7 @@ def main():
                     out_msg = new_message(msg_type=MessageType.JOIN_RELAY,
                             nick=msg.sender_nick, ip=remote_ip,
                             msg_list=msg_list )
+                    msg_list.add(out_msg)
                     dispatcher.send(out_msg, client_list.get())
 
                 elif isinstance(msg, JoinReplyMessage):
@@ -171,6 +177,7 @@ def main():
         # exit cleanup
         listener.stop()
         tui.stop()
+        print("Exited smplchat")
 
 if __name__ == "__main__":
     main()
