@@ -9,6 +9,8 @@ from smplchat.message import Message
 class Dispatcher:
     """ Class for sending UPD packets """
     def __init__(self):
+        # possible permanent socket for very large scale use or due to firewall issues
+        #self._sock = socket(AF_INET, SOCK_DGRAM)
         pass
 
     def send(self, msg: Message, ips: list[IPv4Address]):
@@ -21,3 +23,13 @@ class Dispatcher:
         with socket(AF_INET, SOCK_DGRAM) as sock:	# new UDP socket
             for ip in ips:
                 sock.sendto( packer(msg), (str(ip), SMPLCHAT_PORT) )
+
+    # Uncomment this and comment out above send to use permanent socket:
+    #def send(self, msg: Message, ips: list[IPv4Address]):
+    #    """ Method for sending a UPD packet (permanent socket version) """
+    #    for ip in ips:
+    #        self._sock.sendto(packer(msg), (str(ip), SMPLCHAT_PORT))
+    #
+    #def close(self):
+    #    """ Socket cleanup, insert this at the main.py cleanup """
+    #    self._sock.close()

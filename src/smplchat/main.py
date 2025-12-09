@@ -28,10 +28,9 @@ def main():
     print("Welcome to smplchat!\n")
 
     self_ip = get_my_ip()
-
     dprint(f"INFO: Got ip-address {str(self_ip)}")
 
-    # prompt nickname
+    # prompt nickname, use env if set
     if SMPLCHAT_NICK:
         nick = SMPLCHAT_NICK
     else:
@@ -43,15 +42,16 @@ def main():
 
     # core initializations
     client_list = ClientList(self_ip) # Initialize ip-list
-    listener = Listener()
+    listener = Listener() # listening socket
     msg_list = MessageList()
     keepalive_list = KeepaliveList()
-    initial_messages(msg_list) # adds some helpful messages to the list
-    dispatcher = Dispatcher()
+    dispatcher = Dispatcher() # dispatch sockets
     last_keepalive = time()
 
+    initial_messages(msg_list) # adds some helpful messages to the list
     msg_list.sys_message( f"*** Your IP: {str(self_ip)}" )
 
+    # autojoin ip if env for it set
     if SMPLCHAT_JOIN:
         msg_list.sys_message(f"*** Join request sent to {str(SMPLCHAT_JOIN)}")
         dispatcher.send(
@@ -67,12 +67,15 @@ def main():
             # Process input form listener
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
+
+                # keepalive relay
                 if isinstance(msg, KeepaliveRelayMessage):
                     client_list.add(msg.sender_ip) # keepalive sender is alive
                     if keepalive_list.seen_count(msg.uniq_msg_id) < 2:
                         dispatcher.send(msg,client_list.get(exclude=remote_ip))
                     keepalive_list.add(msg.uniq_msg_id)
 
+                # chat/join/leave relay
                 elif is_relay_message(msg):
                     client_list.add(remote_ip) # relayer is alive
                     seen = msg_list.is_seen(msg.uniq_msg_id)
@@ -84,6 +87,7 @@ def main():
                                 msg, client_list.get(exclude=remote_ip))
                         msg_list.add(msg) # add or update seend count
 
+                # join request
                 elif isinstance(msg, JoinRequestMessage):
                     msg_list.sys_message(
                             f"*** Join request from <{msg.sender_nick}>, "
@@ -101,12 +105,14 @@ def main():
                     msg_list.add(out_msg)
                     dispatcher.send(out_msg, client_list.get())
 
+                # join reply to our join request
                 elif isinstance(msg, JoinReplyMessage):
                     msg_list.sys_message(
                             f"*** Join accepted {str(remote_ip)} ")
                     client_list.add(remote_ip)
                     client_list.add_list(msg.ip_addresses)
 
+                # old history reply and request
                 elif isinstance(msg, OldReplyMessage):
                     msg_list.add(msg)
 
@@ -172,7 +178,7 @@ def main():
                 msg = new_message(MessageType.OLD_REQUEST, uid=waiting_message)
                 dispatcher.send(msg,client_list.get(1))
 
-            # keepalive
+            # keepalive check and dispatch
             if time() - last_keepalive >= KEEPALIVE_INTERVAL:
                 peers = client_list.get()
                 if peers:
