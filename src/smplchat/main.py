@@ -17,7 +17,7 @@ from smplchat.message import (
 from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
-from smplchat.settings import KEEPALIVE_INTERVAL
+from smplchat.settings import KEEPALIVE_INTERVAL, SMPLCHAT_NICK
 
 def main():
     """ main - the entry point to the application """
@@ -29,11 +29,14 @@ def main():
     dprint(f"INFO: Got ip-address {str(self_ip)}")
 
     # prompt nickname
-    try:
-        nick = input("Enter nickname for chat: ").strip() or "anon"
-    except KeyboardInterrupt:
-        print("\nExited smplchat")
-        return
+    if SMPLCHAT_NICK:
+        nick = SMPLCHAT_NICK
+    else:
+        try:
+            nick = input("Enter nickname for chat: ").strip() or "anon"
+        except KeyboardInterrupt:
+            print("\nExited smplchat")
+            return
 
     # core initializations
     client_list = ClientList(self_ip) # Initialize ip-list
