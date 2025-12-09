@@ -81,7 +81,7 @@ class UserInterface:
     def _setup_windows(self) -> None:
         h, w = self._windows.stdscr.getmaxyx()
         self._state.h, self._state.w = h, w
-        info_h, input_h = 4, 2
+        info_h, input_h = 3, 2
         msg_h = h - info_h - input_h
         self._windows.msg_win = self._windows.stdscr.derwin(msg_h, w, 0, 0)
         self._windows.info_win = self._windows.stdscr.derwin(info_h, w, msg_h, 0)
@@ -191,12 +191,10 @@ class UserInterface:
         """ renders text to info-window """
         self._windows.info_win.erase()
         _, info_w = self._windows.info_win.getmaxyx()
-        status = "/join <ip-address> - join chat, /quit - quit the application"
         try:
             self._windows.info_win.hline(0, 0, "-", info_w - 1)
-            self._windows.info_win.addnstr(1, 0, status, info_w -1)
-            self._windows.info_win.addnstr(2, 0, "<message> + Enter - send messages", info_w - 1)
-            self._windows.info_win.hline(3, 0, "-", info_w - 1)
+            self._windows.info_win.addnstr(1, 0, "/help + <enter> - show commands", info_w - 1)
+            self._windows.info_win.hline(2, 0, "-", info_w - 1)
         except curses.error:
             pass
         self._windows.info_win.noutrefresh()
