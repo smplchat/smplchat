@@ -17,7 +17,10 @@ from smplchat.message import (
 from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
-from smplchat.settings import KEEPALIVE_INTERVAL, SMPLCHAT_NICK
+from smplchat.settings import (
+        KEEPALIVE_INTERVAL,
+        SMPLCHAT_NICK,
+        SMPLCHAT_JOIN)
 
 def main():
     """ main - the entry point to the application """
@@ -45,10 +48,17 @@ def main():
     keepalive_list = KeepaliveList()
     initial_messages(msg_list) # adds some helpful messages to the list
     dispatcher = Dispatcher()
-    tui = UserInterface(msg_list, nick)
     last_keepalive = time()
 
     msg_list.sys_message( f"*** Your IP: {str(self_ip)}" )
+
+    if SMPLCHAT_JOIN:
+        msg_list.sys_message(f"*** Join request sent to {str(SMPLCHAT_JOIN)}")
+        dispatcher.send(
+                new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick),
+                [SMPLCHAT_JOIN])
+
+    tui = UserInterface(msg_list, nick)
 
     # main event loop: processes messaging and tui input/output
     try:

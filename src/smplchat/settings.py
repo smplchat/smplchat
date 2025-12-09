@@ -1,6 +1,7 @@
 """ smplchat.settings - Contains global settings like default ports """
 from os import getenv
 from sys import stderr
+from ipaddress import IPv4Address
 
 if "DEBUG" not in globals():
     DEBUG = getenv("DEBUG")
@@ -23,6 +24,12 @@ if "SMPLCHAT_DROP_PERCENT" not in globals():
 
 if "SMPLCHAT_NICK" not in globals():
     SMPLCHAT_NICK = getenv("SMPLCHAT_NICK")
+
+if "SMPLCHAT_JOIN" not in globals():
+    try:
+        SMPLCHAT_JOIN = IPv4Address(getenv("SMPLCHAT_JOIN"))
+    except ValueError:
+        SMPLCHAT_JOIN = None
 
 NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
 KEEPALIVE_INTERVAL = 2 #int(NODE_TIMEOUT/2) # keepalive's interval in seconds
