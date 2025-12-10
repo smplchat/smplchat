@@ -21,24 +21,50 @@ graph TB
 
 ## Operation
 
-Run in terminal from the project folder.
+### Just run the app
 
-Install via:
+Application can be run directly from `src` directory like:
 ```
-PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring poetry install
+python3 -m smplchat
 ```
-And if you want to disclude the dev dependencies, give it the flag " --without dev".
 
-Run the app via:
+### Installation
+
+Installation can be done with pip (or pipx):
+```
+pip install <project folder>
+```
+
+And then run app normally:
+```
+smplchat
+```
+
+## Developement Environment
+
+### Installation
+
+Developement environment with dependencies can be installed with poetry:
+```
+poetry install
+```
+
+### Running
+
+Run the app inside developement environment via:
 ```
 poetry run smplchat
 ```
 
-## Testing
+### Testing
 
-### Basic tests
+Pytest and other tools can be run like:
+```
+poetry run pytest
+```
 
-The project has Pytests (with Coverage) and Pylint set up. They are ran by dev.sh which is also used in the GitHub workflow.
+Developement related commands like pytest, coverage, pylint can also be run through `dev.sh` which is also used in the GitHub workflow.
+
 
 ### Operating multiple clients locally
 
