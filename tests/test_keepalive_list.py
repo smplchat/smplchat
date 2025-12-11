@@ -1,5 +1,7 @@
 import unittest
+from time import time
 
+from smplchat.settings import NODE_TIMEOUT
 from smplchat.client_list import KeepaliveList
 from smplchat.utils import generate_uid
 
@@ -26,3 +28,12 @@ class TestKeepaliveList(unittest.TestCase):
         self.assertEqual(kal.seen_count(u1), 3)
         self.assertEqual(kal.seen_count(u2), 1)
         self.assertEqual(kal.seen_count(u3), 0)
+
+    def test_cleanup(self):
+        kal = KeepaliveList()
+        kal.add(100)
+        kal.add(200)
+        kal._KeepaliveList__entries[100].addtime = int(time()) - NODE_TIMEOUT - 1
+        kal.cleanup()
+        self.assertEqual(kal.seen_count(100), 0)
+        self.assertEqual(kal.seen_count(200), 1)

@@ -1,5 +1,6 @@
 import unittest
 from ipaddress import IPv4Address
+from smplchat.settings import MAX_MESSAGES
 from smplchat.message_list import MessageList
 from smplchat.message import (
     ChatRelayMessage,
@@ -8,8 +9,7 @@ from smplchat.message import (
     JoinReplyMessage,
     JoinRequestMessage,
     OldReplyMessage,
-    KeepaliveRelayMessage,
-    MessageType)
+    KeepaliveRelayMessage)
 from smplchat.message_list.list import (
     FullMessageEntry,
     WaitingMessageEntry,
@@ -214,3 +214,14 @@ class TestMessageList(unittest.TestCase):
         self.ml = MessageList()
         self.add_old_reply()
         self.assertEqual(self.ml.get(), [])
+
+    def test_cleanup(self):
+        ml = MessageList()
+        for i in range(MAX_MESSAGES + 10):
+            ml._MessageList__messages.append(
+                FullMessageEntry(uid=i, seen=1, nick="n", message="m")
+            )
+        ml.cleanup()
+        self.assertEqual(len(ml.get()), MAX_MESSAGES)
+        self.assertEqual(ml.get()[0].uid, 10)
+        self.assertEqual(ml.get()[-1].uid, MAX_MESSAGES + 9)

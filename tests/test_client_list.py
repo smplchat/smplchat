@@ -1,7 +1,6 @@
 import unittest
-
 from time import time
-from random import sample
+
 from smplchat.settings import NODE_TIMEOUT
 from smplchat.client_list import ClientList
 
@@ -31,3 +30,11 @@ class TestClientList(unittest.TestCase):
         self.assertEqual(self.cl.get(), [])
         self.cl.add_list([1, 2])
         self.assertEqual(self.cl.get(), [1, 2])
+
+    def test_cleanup(self):
+        cl = ClientList(0)
+        cl.add(1)
+        cl.add(2)
+        cl._ClientList__iplist[1] = int(time()) - NODE_TIMEOUT - 1
+        cl.cleanup()
+        self.assertEqual(cl.get(10), [2])
