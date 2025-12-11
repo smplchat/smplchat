@@ -35,3 +35,12 @@ class ClientList:
         if len(peers) <= n:
             return peers
         return sample(peers, n)
+
+    # unused remove and clear, undo commenting if needed
+    #def remove(self, ip_addr):
+    #    """ Remove specific ip from the list """
+    #    self.__iplist.pop(ip_addr, None)
+
+    #def clear(self):
+    #    """ Removes all ips from the list """
+    #    self.__iplist.clear()

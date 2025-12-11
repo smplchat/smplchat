@@ -152,6 +152,16 @@ def main():
             elif intxt.startswith("/help"):
                 initial_messages(msg_list)
 
+            elif intxt.startswith("/peers"):
+                peers = client_list.get()
+                if not peers:
+                    msg_list.sys_message("*** No known peers")
+                else:
+                    peer_str = ", ".join(str(ip) for ip in peers) # only ips for now
+                    msg_list.sys_message(
+                        f"*** Known peers ({len(peers)}): {peer_str}"
+                    )
+
             elif intxt.startswith("/join"):
                 msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
                 remote_ip = None
