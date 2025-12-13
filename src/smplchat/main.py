@@ -80,8 +80,8 @@ def main():
                 # chat/join/leave relay
                 elif is_relay_message(msg):
                     client_list.add(remote_ip) # relayer is alive
-                    seen = msg_list.is_seen(msg.uniq_msg_id)
-                    if not seen or seen < RELAY_SEEN_LIMIT: # resend first 2 times
+                    # resend first 2 times
+                    if msg_list.seen_count(msg.uniq_msg_id) < RELAY_SEEN_LIMIT: 
                         # original sender is alive so add to the list
                         client_list.add(msg.sender_ip)
                         # relay messages to other peers
@@ -182,7 +182,8 @@ def main():
                     msg_list.sys_message(
                             f"*** Malformed address {intxt.split()[1]}")
                 if remote_ip:
-                    if not client_list.get(): # clear messages before join if not already joined
+                    # clear messages before join if not already joined
+                    if not client_list.get(1):
                         msg_list.clear_user_messages()
                     msg_list.sys_message(
                             f"*** Join request sent to {str(remote_ip)}")

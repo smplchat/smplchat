@@ -194,8 +194,8 @@ class MessageList:
                 return i
         return None
 
-    def is_seen(self, uid: int):
-        """ is_seen - Returns how many times uid is seen """
+    def seen_count(self, uid: int):
+        """ seen_count - Returns how many times uid has seen """
         for m in self.__messages:
             if hasattr(m, "uid") and m.uid == uid:
                 return getattr(m, "seen", 0)
