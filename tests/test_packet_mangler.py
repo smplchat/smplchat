@@ -3,7 +3,7 @@ from random import randrange, choice
 from ipaddress import IPv4Address
 from secrets import randbits
 
-from smplchat.packet_mangler import *
+from smplchat.udp_comms import packer, unpacker
 from smplchat.message import *
 
 class TestPacker(unittest.TestCase):

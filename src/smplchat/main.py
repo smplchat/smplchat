@@ -1,9 +1,8 @@
 """ main.py - smplchat """
 from ipaddress import IPv4Address, AddressValueError
 from time import time
-from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
-from smplchat.dispatcher import Dispatcher
+from smplchat.udp_comms import Dispatcher, Listener, unpacker
 from smplchat.tui import UserInterface
 from smplchat.message import (
         MessageType,
@@ -15,7 +14,6 @@ from smplchat.message import (
         is_relay_message,
         new_message)
 from smplchat.client_list import ClientList, KeepaliveList
-from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
 from smplchat.settings import (
         GOSSIP_FANOUT,

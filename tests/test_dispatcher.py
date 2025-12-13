@@ -2,14 +2,14 @@ import unittest
 from ipaddress import IPv4Address
 from unittest.mock import patch, MagicMock, call
 
-from smplchat.dispatcher import Dispatcher
+from smplchat.udp_comms import Dispatcher
 from smplchat.message import ChatRelayMessage, MessageType
 from smplchat.settings import SMPLCHAT_PORT
 
 class TestDispatcher(unittest.TestCase):
 
-    @patch("smplchat.dispatcher.dispatcher.socket")
-    @patch("smplchat.dispatcher.dispatcher.packer")
+    @patch("smplchat.udp_comms.dispatcher.socket")
+    @patch("smplchat.udp_comms.dispatcher.packer")
     def test_dispatcher_send(self, mock_packer, mock_socket):
         dispatcher = Dispatcher()
         mock_packer.return_value = b"BLABLA"
@@ -40,8 +40,8 @@ class TestDispatcher(unittest.TestCase):
         actual_calls = [c.args for c in sock_instance.sendto.call_args_list]
         self.assertEqual(expected_calls, actual_calls)
 
-    @patch("smplchat.dispatcher.dispatcher.socket")
-    @patch("smplchat.dispatcher.dispatcher.packer")
+    @patch("smplchat.udp_comms.dispatcher.socket")
+    @patch("smplchat.udp_comms.dispatcher.packer")
     def test_dispatcher_no_send_empty_ip_list(self, mock_packer, mock_socket):
         dispatcher = Dispatcher()
 

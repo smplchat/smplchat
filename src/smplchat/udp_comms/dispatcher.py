@@ -3,8 +3,8 @@ from random import random
 from ipaddress import IPv4Address
 from socket import socket, AF_INET, SOCK_DGRAM
 from smplchat.settings import SMPLCHAT_PORT, SMPLCHAT_DROP_PERCENT
-from smplchat.packet_mangler import packer
 from smplchat.message import Message
+from .packer import packer
 
 class Dispatcher:
     """ Class for sending UPD packets """
