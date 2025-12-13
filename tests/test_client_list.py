@@ -10,26 +10,26 @@ class TestClientList(unittest.TestCase):
 
     def test_add(self):
         self.cl = ClientList(0)
-        self.assertEqual(self.cl.get(), [])
+        self.assertEqual(self.cl.get(2), [])
         self.cl.add(1)
-        self.assertEqual(self.cl.get(), [1])
+        self.assertEqual(self.cl.get(2), [1])
         self.cl.add(2)
-        self.assertEqual(self.cl.get(), [1, 2])
+        self.assertEqual(self.cl.get(2), [1, 2])
         self.cl.add(3)
         self.assertEqual(self.cl.get(3), [1, 2, 3])
 
     def test_add_list(self):
         self.cl = ClientList(0)
         self.cl.add_list([1, 2])
-        self.assertEqual(self.cl.get(), [1, 2])
+        self.assertEqual(self.cl.get(2), [1, 2])
         self.cl.add_list([3, 4])
         self.assertEqual(self.cl.get(4), [1, 2, 3, 4])
 
     def test_get(self):
         self.cl = ClientList(0)
-        self.assertEqual(self.cl.get(), [])
+        self.assertEqual(self.cl.get(2), [])
         self.cl.add_list([1, 2])
-        self.assertEqual(self.cl.get(), [1, 2])
+        self.assertEqual(self.cl.get(2), [1, 2])
 
     def test_cleanup(self):
         cl = ClientList(0)
