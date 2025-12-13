@@ -11,7 +11,7 @@ NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
 KEEPALIVE_INTERVAL = 2 # keepalive's interval in seconds
 CLEANUP_INTERVAL = 60 # how often list cleanup (msg, keepalive, client) occurs in seconds
 LATEST_LIMIT = 50 # latest msgs spread with relays, note: JOIN_REPLY is multiplier of this
-MAX_MESSAGES = 2000 # max number of messages in history, trimmed to this every NODE_TIMEOUT timer
+MAX_MESSAGES = 2000 # max number of messages in history, trimmed every CLEANUP_INTERVAL timer
 
 # the following "if" constants aren't generally to be modified unlike above
 # they may simply get their value from the env
@@ -24,7 +24,7 @@ if "SMPLCHAT_PORT" not in globals():
         SMPLCHAT_PORT = int(getenv("SMPLCHAT_PORT") or 62733)
     except ValueError:
         SMPLCHAT_PORT = 62733
-        print("Ignoring invalid SMPLCHAT_PORT enviromental variable",
+        print("Ignoring invalid SMPLCHAT_PORT environmental variable",
                 file=stderr)
 
 if "SMPLCHAT_DROP_PERCENT" not in globals():
@@ -32,7 +32,7 @@ if "SMPLCHAT_DROP_PERCENT" not in globals():
         SMPLCHAT_DROP_PERCENT = int(getenv("SMPLCHAT_DROP_PERCENT") or 0)
     except ValueError:
         SMPLCHAT_DROP_PERCENT = 0
-        print("Ignoring invalid SMPLCHAT_DROP_PERCENT enviromental variable",
+        print("Ignoring invalid SMPLCHAT_DROP_PERCENT environmental variable",
                 file=stderr)
 
 if "SMPLCHAT_NICK" not in globals():

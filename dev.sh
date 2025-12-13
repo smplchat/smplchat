@@ -2,20 +2,20 @@
 ECHO="`which echo` -e"
 
 [ x$1 = x ] && $ECHO "\
-Small script for running developement tools. 
+Small script for running development tools. 
 
 Usage: $0 <command>
 
 Commands:
 
-dev        Install developement envoronment
-run	   Run the app in developement environment
+dev        Install development environment
+run        Run the app in development environment
 pytest     Run pytest unittests
 pylint     Do pylint
 covhtml    Make branch coverage report with coverage in html format
-covff      Genarate and open html coverage report in firefox
+covff      Generate and open html coverage report in firefox
 covxml     Generate xml coverage report
-auto       Run automated tests. Intented for CI/CD pipeline.
+auto       Run automated tests. Intended for CI/CD pipeline.
 all        Do it all: pytest, coverage report in firefox and pylint
 install    Build PyPI package form source and install it
 " && exit 0

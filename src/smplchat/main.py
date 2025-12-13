@@ -84,12 +84,12 @@ def main():
                     client_list.add(remote_ip) # relayer is alive
                     seen = msg_list.is_seen(msg.uniq_msg_id)
                     if not seen or seen < RELAY_SEEN_LIMIT: # resend first 2 times
-                        # orginal sender is alive so add to the list
+                        # original sender is alive so add to the list
                         client_list.add(msg.sender_ip)
                         # relay messages to other peers
                         dispatcher.send(
                                 msg, client_list.get(GOSSIP_FANOUT, exclude=remote_ip))
-                        msg_list.add(msg) # add or update seend count
+                        msg_list.add(msg) # add or update send count
 
                 # join request
                 elif isinstance(msg, JoinRequestMessage):
