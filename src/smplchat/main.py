@@ -87,7 +87,7 @@ def main():
                         # relay messages to other peers
                         dispatcher.send(
                                 msg, client_list.get(GOSSIP_FANOUT, exclude=remote_ip))
-                        msg_list.add(msg) # add or update send count
+                        msg_list.add(msg) # add or update seen counter
 
                 # join request
                 elif isinstance(msg, JoinRequestMessage):
