@@ -80,9 +80,19 @@ Then in however many terminals with this command we start a container and also s
 ```
 docker run -it --rm smplchat
 ```
-All the containers get their own IP that you can use for the /join command. Use flag " -e DEBUG=1" before smplchat for debug mode.
+All the containers get their own IP that you can use for the /join command. Use flag " -e SMPLCHAT_DEBUG=1" before smplchat for debug mode.
 
 You can run the build command again for any code changes, but if you want to remove the image, run:
 ```
 docker rmi smplchat
+```
+
+### Tweaking settings
+Settings can be modified in two places. Directly from `settings.py` file or by environment variables.
+
+Environment variables have `SMPLCHAT_` prefix.
+
+For example adjust settings so that gossipping relays message to 5 others and stops after it:
+```
+GOSSIP_FANOUT=5 RELAY_SEEN_LIMIT=1 smplchat
 ```
