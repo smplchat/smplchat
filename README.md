@@ -94,5 +94,5 @@ Environment variables have `SMPLCHAT_` prefix.
 
 For example adjust settings so that gossipping relays message to 5 others and stops after it:
 ```
-GOSSIP_FANOUT=5 RELAY_SEEN_LIMIT=1 smplchat
+SMPLCHAT_GOSSIP_FANOUT=5 SMPLCHAT_RELAY_SEEN_LIMIT=1 smplchat
 ```
